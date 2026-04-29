@@ -1,0 +1,4087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sticker Prompt Generator v5 — AI Sticker Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050507;
+  --bg2:#0a0a10;
+  --bg3:#10101a;
+  --bg4:#16161f;
+  --bg5:#1c1c28;
+  --ac:#c93fff;
+  --ac2:#9b2fd4;
+  --cy:#00ffdd;
+  --cy2:#00c8ad;
+  --ye:#ffd600;
+  --pi:#ff6ec7;
+  --gr:#39ff14;
+  --or:#ff7a00;
+  --rd:#ff3c3c;
+  --txt:#e8e8f0;
+  --txt2:#a0a0b8;
+  --txt3:#606078;
+  --brd:#2a2a3a;
+  --brd2:#3a3a50;
+  --card:#12121c;
+  --glow-ac:0 0 20px rgba(201,63,255,.4);
+  --glow-cy:0 0 20px rgba(0,255,221,.4);
+  --glow-ye:0 0 20px rgba(255,214,0,.4);
+  --rad:8px;
+  --rad2:12px;
+  --rad3:16px;
+  --trans:.15s ease;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--txt);
+  font-family:'Inter',sans-serif;
+  font-size:14px;
+  line-height:1.6;
+  min-height:100vh;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--ac2)}
+
+/* ── HEADER ── */
+.site-header{
+  background:linear-gradient(135deg,var(--bg2) 0%,#0d0d18 100%);
+  border-bottom:1px solid var(--brd);
+  padding:18px 24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+  backdrop-filter:blur(8px);
+}
+.logo{
+  display:flex;align-items:center;gap:12px;
+}
+.logo-icon{
+  width:38px;height:38px;
+  background:linear-gradient(135deg,var(--ac),var(--cy));
+  border-radius:var(--rad);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+  box-shadow:var(--glow-ac);
+}
+.logo-text{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:22px;
+  letter-spacing:2px;
+  background:linear-gradient(90deg,var(--ac),var(--cy));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.logo-sub{
+  font-size:10px;
+  color:var(--txt3);
+  letter-spacing:1px;
+  text-transform:uppercase;
+  margin-top:-2px;
+}
+.header-right{
+  display:flex;align-items:center;gap:10px;
+}
+.badge{
+  background:var(--bg4);
+  border:1px solid var(--brd2);
+  border-radius:20px;
+  padding:4px 12px;
+  font-size:11px;
+  color:var(--txt2);
+  font-family:'JetBrains Mono',monospace;
+}
+.badge.v{color:var(--cy);border-color:var(--cy2);}
+
+/* ── MAIN LAYOUT ── */
+.main-wrap{
+  display:grid;
+  grid-template-columns:300px 1fr;
+  gap:0;
+  height:calc(100vh - 65px);
+}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  background:var(--bg2);
+  border-right:1px solid var(--brd);
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+}
+.sidebar-section{
+  padding:16px;
+  border-bottom:1px solid var(--brd);
+}
+.sidebar-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:13px;
+  letter-spacing:2px;
+  color:var(--txt3);
+  text-transform:uppercase;
+  margin-bottom:10px;
+  display:flex;align-items:center;gap:6px;
+}
+.sidebar-title::before{
+  content:'';display:block;
+  width:2px;height:14px;
+  background:var(--ac);
+  border-radius:1px;
+}
+
+/* ── PLATFORM TABS ── */
+.platform-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:6px;
+}
+.plat-btn{
+  background:var(--bg4);
+  border:1px solid var(--brd);
+  border-radius:var(--rad);
+  padding:8px 4px;
+  cursor:pointer;
+  transition:var(--trans);
+  text-align:center;
+  color:var(--txt2);
+  font-size:10px;
+  letter-spacing:.5px;
+}
+.plat-btn:hover{border-color:var(--ac);color:var(--txt)}
+.plat-btn.active{
+  background:linear-gradient(135deg,rgba(201,63,255,.15),rgba(0,255,221,.08));
+  border-color:var(--ac);
+  color:var(--ac);
+  box-shadow:var(--glow-ac);
+}
+.plat-btn .plat-icon{font-size:18px;display:block;margin-bottom:3px}
+
+/* ── CATEGORY GRID ── */
+.cat-search{
+  background:var(--bg4);
+  border:1px solid var(--brd);
+  border-radius:var(--rad);
+  padding:7px 10px;
+  color:var(--txt);
+  font-family:'Inter',sans-serif;
+  font-size:13px;
+  width:100%;
+  margin-bottom:10px;
+  outline:none;
+  transition:var(--trans);
+}
+.cat-search:focus{border-color:var(--ac)}
+.cat-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:5px;
+  max-height:280px;
+  overflow-y:auto;
+}
+.cat-btn{
+  background:var(--bg4);
+  border:1px solid var(--brd);
+  border-radius:var(--rad);
+  padding:7px 8px;
+  cursor:pointer;
+  transition:var(--trans);
+  display:flex;
+  align-items:center;
+  gap:6px;
+  color:var(--txt2);
+  font-size:11px;
+  text-align:left;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.cat-btn:hover{border-color:var(--brd2);color:var(--txt)}
+.cat-btn.active{
+  border-color:var(--cy);
+  color:var(--cy);
+  background:rgba(0,255,221,.06);
+}
+.cat-btn .cat-ic{font-size:16px;flex-shrink:0}
+
+/* ── ENGINE TABS ── */
+.engine-tabs{
+  display:flex;flex-wrap:wrap;gap:5px;
+}
+.eng-btn{
+  background:var(--bg4);
+  border:1px solid var(--brd);
+  border-radius:20px;
+  padding:5px 11px;
+  font-size:11px;
+  cursor:pointer;
+  color:var(--txt2);
+  transition:var(--trans);
+  font-family:'JetBrains Mono',monospace;
+}
+.eng-btn:hover{border-color:var(--ye);color:var(--ye)}
+.eng-btn.active{
+  background:rgba(255,214,0,.12);
+  border-color:var(--ye);
+  color:var(--ye);
+}
+
+/* ── STICKER TECH ── */
+.tech-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.tech-group label{
+  display:block;
+  font-size:10px;
+  color:var(--txt3);
+  text-transform:uppercase;
+  letter-spacing:.8px;
+  margin-bottom:4px;
+}
+.tech-group select{
+  width:100%;
+  background:var(--bg4);
+  border:1px solid var(--brd);
+  border-radius:var(--rad);
+  padding:6px 8px;
+  color:var(--txt);
+  font-size:11px;
+  font-family:'Inter',sans-serif;
+  cursor:pointer;
+  outline:none;
+  transition:var(--trans);
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23606078'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 8px center;
+  padding-right:22px;
+}
+.tech-group select:focus{border-color:var(--pi)}
+
+/* ── VARIATION MODE ── */
+.var-modes{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:5px;
+}
+.var-btn{
+  background:var(--bg4);
+  border:1px solid var(--brd);
+  border-radius:var(--rad);
+  padding:6px 4px;
+  cursor:pointer;
+  text-align:center;
+  font-size:10px;
+  color:var(--txt2);
+  transition:var(--trans);
+}
+.var-btn:hover{border-color:var(--gr);color:var(--gr)}
+.var-btn.active{
+  background:rgba(57,255,20,.08);
+  border-color:var(--gr);
+  color:var(--gr);
+}
+.var-btn .var-icon{font-size:16px;display:block;margin-bottom:2px}
+
+/* ── MODS SECTION ── */
+.mods-grid{
+  display:flex;flex-wrap:wrap;gap:5px;
+}
+.mod-chip{
+  background:var(--bg4);
+  border:1px solid var(--brd);
+  border-radius:20px;
+  padding:4px 10px;
+  font-size:10px;
+  cursor:pointer;
+  color:var(--txt2);
+  transition:var(--trans);
+  user-select:none;
+}
+.mod-chip:hover{border-color:var(--pi)}
+.mod-chip.active{
+  background:rgba(255,110,199,.12);
+  border-color:var(--pi);
+  color:var(--pi);
+}
+
+/* ── QUICK TEMPLATES ── */
+.tpl-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:5px;
+  max-height:260px;
+  overflow-y:auto;
+}
+.tpl-btn{
+  background:var(--bg4);
+  border:1px solid var(--brd);
+  border-radius:var(--rad);
+  padding:8px;
+  cursor:pointer;
+  text-align:left;
+  color:var(--txt2);
+  font-size:10px;
+  transition:var(--trans);
+  display:flex;align-items:center;gap:6px;
+}
+.tpl-btn:hover{
+  border-color:var(--or);
+  color:var(--or);
+  background:rgba(255,122,0,.06);
+}
+.tpl-btn .tpl-ic{font-size:18px;flex-shrink:0}
+
+/* ── CONTENT AREA ── */
+.content{
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* ── TOP BAR ── */
+.top-bar{
+  background:var(--bg2);
+  border-bottom:1px solid var(--brd);
+  padding:12px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-shrink:0;
+}
+.cat-info{
+  display:flex;align-items:center;gap:12px;
+}
+.cat-big-icon{
+  font-size:28px;
+  filter:drop-shadow(0 0 8px var(--ac));
+}
+.cat-meta{}
+.cat-name{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:20px;
+  letter-spacing:2px;
+  background:linear-gradient(90deg,var(--ac),var(--cy));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.cat-sub{font-size:11px;color:var(--txt3)}
+.top-actions{
+  display:flex;align-items:center;gap:8px;
+}
+
+/* ── BUTTONS ── */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  border:none;border-radius:var(--rad);
+  padding:8px 16px;
+  font-size:12px;
+  font-family:'Inter',sans-serif;
+  font-weight:600;
+  cursor:pointer;
+  transition:var(--trans);
+  letter-spacing:.3px;
+  white-space:nowrap;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--ac),var(--ac2));
+  color:#fff;
+  box-shadow:var(--glow-ac);
+}
+.btn-primary:hover{
+  background:linear-gradient(135deg,#d44fff,var(--ac));
+  transform:translateY(-1px);
+}
+.btn-cyan{
+  background:linear-gradient(135deg,var(--cy2),#007a6b);
+  color:#000;
+}
+.btn-cyan:hover{background:linear-gradient(135deg,var(--cy),var(--cy2));transform:translateY(-1px)}
+.btn-outline{
+  background:transparent;
+  border:1px solid var(--brd2);
+  color:var(--txt2);
+}
+.btn-outline:hover{border-color:var(--ac);color:var(--ac)}
+.btn-sm{padding:5px 12px;font-size:11px}
+.btn-xs{padding:3px 8px;font-size:10px}
+.btn-ye{background:linear-gradient(135deg,var(--ye),#cc9e00);color:#000}
+.btn-ye:hover{background:linear-gradient(135deg,#ffe033,var(--ye));transform:translateY(-1px)}
+
+/* ── OUTPUT TABS ── */
+.output-tabs{
+  display:flex;
+  border-bottom:1px solid var(--brd);
+  background:var(--bg3);
+  padding:0 20px;
+  gap:0;
+  flex-shrink:0;
+}
+.out-tab{
+  padding:10px 16px;
+  font-size:12px;
+  font-family:'JetBrains Mono',monospace;
+  color:var(--txt3);
+  cursor:pointer;
+  border-bottom:2px solid transparent;
+  transition:var(--trans);
+  white-space:nowrap;
+  display:flex;align-items:center;gap:5px;
+}
+.out-tab:hover{color:var(--txt2)}
+.out-tab.active{
+  color:var(--ac);
+  border-bottom-color:var(--ac);
+}
+.tab-dot{
+  width:6px;height:6px;
+  border-radius:50%;
+  background:var(--txt3);
+  transition:var(--trans);
+}
+.out-tab.active .tab-dot{background:var(--ac)}
+
+/* ── OUTPUT AREA ── */
+.output-area{
+  flex:1;
+  overflow-y:auto;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+/* ── PROMPT BLOCK ── */
+.prompt-block{
+  background:var(--card);
+  border:1px solid var(--brd);
+  border-radius:var(--rad2);
+  overflow:hidden;
+  transition:var(--trans);
+}
+.prompt-block:hover{border-color:var(--brd2)}
+.prompt-header{
+  background:var(--bg3);
+  padding:10px 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid var(--brd);
+}
+.prompt-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  font-weight:600;
+  display:flex;align-items:center;gap:6px;
+}
+.prompt-label .dot{
+  width:8px;height:8px;border-radius:50%;
+}
+.dot-mj{background:#00a8ff}
+.dot-nb2{background:var(--ac)}
+.dot-sd{background:var(--gr)}
+.dot-gem{background:#4285f4}
+.dot-flow{background:var(--cy)}
+.dot-leo{background:var(--or)}
+.prompt-actions{
+  display:flex;gap:5px;align-items:center;
+}
+.copy-btn{
+  background:var(--bg5);
+  border:1px solid var(--brd2);
+  border-radius:var(--rad);
+  padding:4px 10px;
+  font-size:10px;
+  color:var(--txt2);
+  cursor:pointer;
+  font-family:'JetBrains Mono',monospace;
+  transition:var(--trans);
+  display:flex;align-items:center;gap:4px;
+}
+.copy-btn:hover{border-color:var(--cy);color:var(--cy)}
+.copy-btn.copied{
+  border-color:var(--gr);
+  color:var(--gr);
+}
+.prompt-body{
+  padding:14px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  line-height:1.7;
+  color:var(--txt);
+  white-space:pre-wrap;
+  word-break:break-word;
+  position:relative;
+}
+.prompt-body .section{color:var(--ac);font-weight:600}
+.prompt-body .keyword{color:var(--cy)}
+.prompt-body .flag{color:var(--ye)}
+.prompt-body .neg{color:var(--rd)}
+.prompt-char{
+  position:absolute;
+  bottom:8px;right:10px;
+  font-size:9px;
+  color:var(--txt3);
+  background:var(--bg3);
+  padding:2px 6px;
+  border-radius:10px;
+}
+
+/* ── KEYWORD TAGS ── */
+.kw-tags{
+  display:flex;flex-wrap:wrap;gap:4px;
+  padding:0 14px 10px;
+}
+.kw-tag{
+  background:var(--bg4);
+  border:1px solid var(--brd);
+  border-radius:20px;
+  padding:2px 8px;
+  font-size:10px;
+  color:var(--txt3);
+  font-family:'JetBrains Mono',monospace;
+}
+
+/* ── VARIATIONS GRID ── */
+.var-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:12px;
+}
+.var-card{
+  background:var(--card);
+  border:1px solid var(--brd);
+  border-radius:var(--rad2);
+  overflow:hidden;
+  transition:var(--trans);
+}
+.var-card:hover{border-color:var(--brd2);transform:translateY(-2px)}
+.var-card-head{
+  background:var(--bg3);
+  padding:8px 12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid var(--brd);
+}
+.var-num{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:14px;
+  color:var(--ac);
+  letter-spacing:1px;
+}
+.var-card-body{
+  padding:10px 12px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  line-height:1.6;
+  color:var(--txt2);
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+/* ── SEO PANEL ── */
+.seo-panel{
+  background:var(--card);
+  border:1px solid var(--brd);
+  border-radius:var(--rad2);
+}
+.seo-header{
+  background:var(--bg3);
+  padding:10px 16px;
+  border-bottom:1px solid var(--brd);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.seo-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:15px;
+  letter-spacing:1px;
+  color:var(--ye);
+}
+.seo-body{padding:14px}
+.seo-row{
+  margin-bottom:12px;
+}
+.seo-row label{
+  display:block;
+  font-size:10px;
+  color:var(--txt3);
+  text-transform:uppercase;
+  letter-spacing:.8px;
+  margin-bottom:4px;
+}
+.seo-row .seo-val{
+  background:var(--bg4);
+  border:1px solid var(--brd);
+  border-radius:var(--rad);
+  padding:8px 10px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  color:var(--txt);
+  line-height:1.5;
+  width:100%;
+  cursor:text;
+  word-break:break-word;
+}
+.seo-tags{
+  display:flex;flex-wrap:wrap;gap:4px;
+  background:var(--bg4);
+  border:1px solid var(--brd);
+  border-radius:var(--rad);
+  padding:8px;
+}
+.seo-tag{
+  background:var(--bg5);
+  border:1px solid var(--brd2);
+  border-radius:12px;
+  padding:2px 8px;
+  font-size:10px;
+  color:var(--cy);
+  font-family:'JetBrains Mono',monospace;
+}
+
+/* ── HISTORY ── */
+.history-list{
+  display:flex;flex-direction:column;gap:8px;
+}
+.hist-item{
+  background:var(--card);
+  border:1px solid var(--brd);
+  border-radius:var(--rad);
+  padding:10px 12px;
+  cursor:pointer;
+  transition:var(--trans);
+  display:flex;align-items:flex-start;gap:10px;
+}
+.hist-item:hover{border-color:var(--brd2);background:var(--bg4)}
+.hist-meta{
+  font-size:10px;
+  color:var(--txt3);
+  flex-shrink:0;
+  text-align:right;
+}
+.hist-preview{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  color:var(--txt2);
+  flex:1;
+  overflow:hidden;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+}
+
+/* ── TIPS PANEL ── */
+.tips-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.tip-card{
+  background:var(--card);
+  border:1px solid var(--brd);
+  border-radius:var(--rad2);
+  padding:14px;
+}
+.tip-card h4{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:14px;
+  letter-spacing:1px;
+  margin-bottom:8px;
+  color:var(--cy);
+}
+.tip-card p,.tip-card li{
+  font-size:11px;
+  color:var(--txt2);
+  line-height:1.6;
+  margin-bottom:4px;
+}
+.tip-card ul{padding-left:14px}
+.tip-card code{
+  font-family:'JetBrains Mono',monospace;
+  background:var(--bg4);
+  border-radius:3px;
+  padding:1px 4px;
+  color:var(--ye);
+  font-size:10px;
+}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;
+  bottom:24px;right:24px;
+  background:var(--bg3);
+  border:1px solid var(--gr);
+  border-radius:var(--rad2);
+  padding:10px 18px;
+  font-size:12px;
+  color:var(--gr);
+  z-index:9999;
+  opacity:0;
+  transform:translateY(10px);
+  transition:all .25s ease;
+  pointer-events:none;
+  font-family:'JetBrains Mono',monospace;
+  box-shadow:0 4px 20px rgba(0,0,0,.5),var(--glow-cy);
+}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* ── EMPTY STATE ── */
+.empty{
+  text-align:center;
+  padding:48px 24px;
+  color:var(--txt3);
+}
+.empty-icon{font-size:48px;margin-bottom:12px;opacity:.4}
+.empty p{font-size:12px;line-height:1.7}
+
+/* ── STAT CHIPS ── */
+.stat-row{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  padding:8px 20px;
+  background:var(--bg3);
+  border-bottom:1px solid var(--brd);
+  font-size:10px;
+  color:var(--txt3);
+  font-family:'JetBrains Mono',monospace;
+  flex-shrink:0;
+}
+.stat-chip{
+  background:var(--bg4);
+  border:1px solid var(--brd);
+  border-radius:10px;
+  padding:2px 8px;
+  display:flex;align-items:center;gap:4px;
+}
+.stat-chip .sc-val{
+  color:var(--ac);
+  font-weight:600;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .main-wrap{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .sidebar{max-height:45vh;border-right:none;border-bottom:1px solid var(--brd)}
+  .tips-grid{grid-template-columns:1fr}
+  .platform-grid{grid-template-columns:repeat(6,1fr)}
+}
+
+/* ── SCROLLABLE SIDEBAR SECTIONS ── */
+.sidebar-scroll{
+  overflow-y:auto;
+  flex:1;
+}
+
+/* ── GRADIENT BORDER GLOW on active card ── */
+.prompt-block.engine-mj{border-color:#00a8ff30}
+.prompt-block.engine-mj:hover{border-color:#00a8ff}
+.prompt-block.engine-gem{border-color:#4285f430}
+.prompt-block.engine-gem:hover{border-color:#4285f4}
+.prompt-block.engine-flow{border-color:#00ffdd30}
+.prompt-block.engine-flow:hover{border-color:var(--cy)}
+.prompt-block.engine-leo{border-color:#ff7a0030}
+.prompt-block.engine-leo:hover{border-color:var(--or)}
+
+/* ── CHAR COUNT PROGRESS ── */
+.char-bar{
+  height:2px;
+  background:var(--bg5);
+  border-radius:1px;
+  overflow:hidden;
+}
+.char-fill{
+  height:100%;
+  border-radius:1px;
+  transition:width .3s ease;
+}
+
+/* ── SPINNER ── */
+.spinner{
+  width:16px;height:16px;
+  border:2px solid var(--brd2);
+  border-top-color:var(--ac);
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+  display:inline-block;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── COPY ALL BTN ── */
+.copy-all-bar{
+  background:var(--bg3);
+  border-bottom:1px solid var(--brd);
+  padding:8px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  flex-shrink:0;
+}
+
+/* ── COMMERCIAL SAFE TOGGLE ── */
+.commercial-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(255,214,0,.06);
+  border:1px solid rgba(255,214,0,.2);
+  border-radius:var(--rad);
+  padding:8px 10px;
+  margin-top:0;
+}
+.commercial-label{
+  font-size:11px;
+  color:var(--ye);
+  font-weight:600;
+  display:flex;align-items:center;gap:5px;
+}
+.commercial-sub{
+  font-size:9px;
+  color:var(--txt3);
+  margin-top:1px;
+}
+.toggle-wrap{position:relative;width:36px;height:20px;flex-shrink:0}
+.toggle-wrap input{opacity:0;width:0;height:0}
+.toggle-slider{
+  position:absolute;inset:0;
+  background:var(--bg5);
+  border:1px solid var(--brd2);
+  border-radius:20px;
+  cursor:pointer;
+  transition:.2s;
+}
+.toggle-slider:before{
+  content:'';position:absolute;
+  width:14px;height:14px;
+  border-radius:50%;
+  background:var(--txt3);
+  left:2px;top:2px;
+  transition:.2s;
+}
+.toggle-wrap input:checked+.toggle-slider{
+  background:rgba(255,214,0,.2);
+  border-color:var(--ye);
+}
+.toggle-wrap input:checked+.toggle-slider:before{
+  background:var(--ye);
+  transform:translateX(16px);
+}
+/* ── KIDS AGE BADGE ── */
+.age-badge{
+  font-size:8px;font-weight:700;
+  border-radius:6px;padding:1px 5px;
+  background:rgba(57,255,20,.12);
+  color:var(--gr);
+  border:1px solid rgba(57,255,20,.25);
+  font-family:'JetBrains Mono',monospace;
+  flex-shrink:0;letter-spacing:.3px;
+}
+/* ── COMMERCIAL SAFE PROMPT BLOCK ── */
+.prompt-block.commercial-safe{
+  border-color:rgba(255,214,0,.3);
+}
+.prompt-block.commercial-safe .prompt-header{
+  background:linear-gradient(90deg,rgba(255,214,0,.08),transparent);
+}
+.safe-badge{
+  font-size:9px;padding:2px 6px;border-radius:10px;
+  background:rgba(255,214,0,.15);
+  color:var(--ye);
+  border:1px solid rgba(255,214,0,.3);
+  font-family:'JetBrains Mono',monospace;
+}
+/* ══ SIMPLE / EXPERT MODE ══ */
+.mode-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px;
+  background:linear-gradient(90deg,rgba(201,63,255,.08),rgba(0,255,221,.04));
+  border-bottom:1px solid var(--brd);
+}
+.mode-label{font-size:11px;font-weight:600;color:var(--txt2);display:flex;align-items:center;gap:6px}
+.mode-pill{
+  display:flex;
+  background:var(--bg4);
+  border:1px solid var(--brd2);
+  border-radius:20px;
+  padding:2px;
+  gap:2px;
+}
+.mode-pill-btn{
+  padding:4px 12px;
+  border-radius:16px;
+  border:none;
+  font-size:10px;
+  font-weight:600;
+  cursor:pointer;
+  font-family:'Inter',sans-serif;
+  transition:var(--trans);
+  color:var(--txt3);
+  background:transparent;
+  letter-spacing:.3px;
+}
+.mode-pill-btn.active{
+  background:linear-gradient(135deg,var(--ac),var(--ac2));
+  color:#fff;
+  box-shadow:0 2px 8px rgba(201,63,255,.4);
+}
+
+/* Expert-only sections hidden in simple mode */
+.expert-only{display:block}
+body.simple-mode .expert-only{display:none!important}
+
+/* ── QUICKSTART PANEL ── */
+.qs-panel{
+  padding:12px 16px;
+  border-bottom:1px solid var(--brd);
+  background:var(--bg2);
+}
+.qs-title{
+  font-size:10px;color:var(--txt3);
+  text-transform:uppercase;letter-spacing:1px;
+  font-family:'JetBrains Mono',monospace;
+  margin-bottom:8px;
+  display:flex;align-items:center;gap:6px;
+}
+.qs-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:5px;
+}
+.qs-btn{
+  background:var(--bg4);
+  border:1px solid var(--brd);
+  border-radius:var(--rad);
+  padding:7px 8px;
+  cursor:pointer;
+  text-align:left;
+  transition:var(--trans);
+  display:flex;flex-direction:column;gap:2px;
+}
+.qs-btn:hover{border-color:var(--ac);background:rgba(201,63,255,.06)}
+.qs-btn-top{display:flex;align-items:center;gap:5px}
+.qs-ic{font-size:15px;flex-shrink:0}
+.qs-name{font-size:10px;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qs-meta{font-size:9px;color:var(--txt3);font-family:'JetBrains Mono',monospace;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qs-badges{display:flex;gap:3px;flex-wrap:wrap}
+.qs-badge{
+  font-size:8px;padding:1px 5px;border-radius:6px;
+  background:var(--bg5);border:1px solid var(--brd2);
+  color:var(--txt3);font-family:'JetBrains Mono',monospace;
+}
+
+/* ── SIMPLE ENGINE TABS (bigger, fewer) ── */
+.engine-simple{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:6px;
+}
+.eng-simple-btn{
+  background:var(--bg4);
+  border:1px solid var(--brd);
+  border-radius:var(--rad);
+  padding:10px 6px;
+  cursor:pointer;
+  text-align:center;
+  font-size:11px;
+  font-weight:600;
+  color:var(--txt2);
+  transition:var(--trans);
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+}
+.eng-simple-btn .eng-ic{font-size:18px}
+.eng-simple-btn:hover{border-color:var(--ye);color:var(--ye)}
+.eng-simple-btn.active{
+  background:rgba(255,214,0,.1);
+  border-color:var(--ye);color:var(--ye);
+  box-shadow:var(--glow-ye);
+}
+
+/* simple mode platform bar — compact row */
+.plat-simple{display:flex;flex-wrap:wrap;gap:4px}
+.plat-simple-btn{
+  background:var(--bg4);border:1px solid var(--brd);
+  border-radius:20px;padding:4px 10px;
+  font-size:10px;cursor:pointer;color:var(--txt2);
+  transition:var(--trans);
+}
+.plat-simple-btn:hover{border-color:var(--ac);color:var(--ac)}
+.plat-simple-btn.active{background:rgba(201,63,255,.12);border-color:var(--ac);color:var(--ac)}
+
+/* ── USAGE GUIDE ── */
+.guide-wrap{padding:0}
+.guide-step{
+  background:var(--card);border:1px solid var(--brd);
+  border-radius:var(--rad2);padding:14px;
+  display:flex;gap:12px;
+}
+.step-num{
+  width:28px;height:28px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--ac),var(--ac2));
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:14px;color:#fff;
+}
+.step-body h4{font-size:12px;font-weight:700;color:var(--txt);margin-bottom:4px}
+.step-body p{font-size:11px;color:var(--txt2);line-height:1.6}
+.step-body code{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  background:var(--bg4);border-radius:3px;padding:1px 5px;color:var(--cy);
+}
+.guide-section-title{
+  font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;
+  color:var(--ac);margin:16px 0 8px;
+}
+
+/* ── DEMAND BADGES ── */
+.demand-badge{
+  font-size:8px;
+  font-weight:700;
+  letter-spacing:.5px;
+  border-radius:6px;
+  padding:1px 5px;
+  flex-shrink:0;
+  font-family:'JetBrains Mono',monospace;
+  text-transform:uppercase;
+}
+.demand-hi{background:rgba(255,60,60,.18);color:#ff6b6b;border:1px solid rgba(255,60,60,.3)}
+.demand-md{background:rgba(255,214,0,.15);color:var(--ye);border:1px solid rgba(255,214,0,.25)}
+.demand-lo{background:rgba(96,96,120,.3);color:var(--txt3);border:1px solid var(--brd)}
+
+/* ── MONTH FILTER ── */
+.month-filter{
+  display:flex;flex-wrap:wrap;gap:3px;
+  margin-bottom:8px;
+}
+.month-btn{
+  background:var(--bg4);
+  border:1px solid var(--brd);
+  border-radius:6px;
+  padding:3px 7px;
+  font-size:9px;
+  font-family:'JetBrains Mono',monospace;
+  color:var(--txt3);
+  cursor:pointer;
+  transition:var(--trans);
+  letter-spacing:.3px;
+}
+.month-btn:hover{border-color:var(--cy);color:var(--cy)}
+.month-btn.active{
+  background:rgba(0,255,221,.1);
+  border-color:var(--cy);
+  color:var(--cy);
+}
+
+/* ── CAT BTN WITH DEMAND ── */
+.cat-btn{
+  position:relative;
+}
+.cat-btn-inner{
+  display:flex;align-items:center;gap:5px;flex:1;overflow:hidden;
+}
+.cat-btn-name{
+  font-size:10px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  flex:1;
+}
+.cat-month-tag{
+  font-size:8px;
+  color:var(--txt3);
+  font-family:'JetBrains Mono',monospace;
+  flex-shrink:0;
+}
+
+/* ── FORMAT TOGGLE ── */
+.format-toggle{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  margin-bottom:10px;
+}
+.fmt-btn{
+  background:var(--bg4);
+  border:1px solid var(--brd);
+  border-radius:var(--rad);
+  padding:9px 6px;
+  cursor:pointer;
+  text-align:center;
+  color:var(--txt2);
+  font-size:11px;
+  font-weight:500;
+  transition:var(--trans);
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+}
+.fmt-btn .fmt-ic{font-size:20px}
+.fmt-btn:hover{border-color:var(--ac);color:var(--txt)}
+.fmt-btn.active{
+  background:linear-gradient(135deg,rgba(201,63,255,.15),rgba(0,255,221,.08));
+  border-color:var(--ac);
+  color:var(--ac);
+  box-shadow:var(--glow-ac);
+}
+
+/* ── GRID LAYOUT BUTTONS ── */
+.grid-options{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:5px;
+  margin-bottom:8px;
+}
+.grid-btn{
+  background:var(--bg4);
+  border:1px solid var(--brd);
+  border-radius:var(--rad);
+  padding:7px 4px;
+  cursor:pointer;
+  text-align:center;
+  font-size:10px;
+  font-family:'JetBrains Mono',monospace;
+  color:var(--txt2);
+  transition:var(--trans);
+  line-height:1.3;
+}
+.grid-btn .grid-label{
+  font-size:11px;
+  font-weight:700;
+  display:block;
+  color:var(--txt);
+}
+.grid-btn .grid-count{
+  font-size:9px;
+  color:var(--txt3);
+}
+.grid-btn:hover{border-color:var(--cy);color:var(--cy)}
+.grid-btn:hover .grid-label{color:var(--cy)}
+.grid-btn.active{
+  background:rgba(0,255,221,.08);
+  border-color:var(--cy);
+}
+.grid-btn.active .grid-label{color:var(--cy)}
+.grid-btn.active .grid-count{color:var(--cy2)}
+
+/* ── ICON COUNT BUTTONS ── */
+.count-options{
+  display:flex;flex-wrap:wrap;gap:5px;
+}
+.cnt-btn{
+  background:var(--bg4);
+  border:1px solid var(--brd);
+  border-radius:var(--rad);
+  padding:5px 12px;
+  cursor:pointer;
+  font-size:12px;
+  font-weight:700;
+  font-family:'JetBrains Mono',monospace;
+  color:var(--txt2);
+  transition:var(--trans);
+  flex:1;
+  text-align:center;
+  min-width:38px;
+}
+.cnt-btn:hover{border-color:var(--ye);color:var(--ye)}
+.cnt-btn.active{
+  background:rgba(255,214,0,.12);
+  border-color:var(--ye);
+  color:var(--ye);
+}
+
+/* ── SHEET PANEL (hidden when single) ── */
+.sheet-panel{display:none}
+.sheet-panel.visible{display:block}
+
+/* ── MOMENT HIGHLIGHT ── */
+.moment-section-title{
+  font-size:9px;
+  color:var(--txt3);
+  text-transform:uppercase;
+  letter-spacing:1px;
+  padding:4px 0 2px;
+  font-family:'JetBrains Mono',monospace;
+  border-top:1px solid var(--brd);
+  margin-top:4px;
+  grid-column:1/-1;
+}
+
+/* ── PANDUAN BUTTON (HEADER) ── */
+.btn-guide{
+  background:linear-gradient(135deg,rgba(0,255,221,.15),rgba(201,63,255,.1));
+  border:1px solid var(--cy);
+  border-radius:var(--rad);
+  color:var(--cy);
+  font-size:12px;
+  font-weight:700;
+  padding:6px 14px;
+  cursor:pointer;
+  transition:var(--trans);
+  letter-spacing:.3px;
+  white-space:nowrap;
+}
+.btn-guide:hover{
+  background:linear-gradient(135deg,rgba(0,255,221,.25),rgba(201,63,255,.2));
+  box-shadow:var(--glow-cy);
+}
+
+/* ── GUIDE MODAL ── */
+.gm-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.88);
+  z-index:2000;
+  backdrop-filter:blur(8px);
+  overflow-y:auto;
+  padding:20px;
+  animation:fadeIn .2s ease;
+}
+.gm-overlay.open{display:flex;align-items:flex-start;justify-content:center}
+.gm-box{
+  background:var(--bg2);
+  border:1px solid var(--brd2);
+  border-radius:var(--rad3);
+  max-width:920px;
+  width:100%;
+  margin:auto;
+  position:relative;
+  overflow:hidden;
+}
+.gm-head{
+  background:linear-gradient(135deg,rgba(201,63,255,.18) 0%,rgba(0,255,221,.1) 100%);
+  border-bottom:1px solid var(--brd);
+  padding:18px 24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:sticky;top:0;
+  backdrop-filter:blur(10px);
+  z-index:10;
+}
+.gm-head-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:22px;
+  letter-spacing:1px;
+  background:linear-gradient(90deg,var(--cy),var(--ac));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.gm-head-sub{
+  font-size:11px;
+  color:var(--txt3);
+  margin-top:2px;
+}
+.gm-close{
+  background:var(--bg4);
+  border:1px solid var(--brd);
+  border-radius:var(--rad);
+  color:var(--txt2);
+  width:34px;height:34px;
+  cursor:pointer;font-size:18px;
+  display:flex;align-items:center;justify-content:center;
+  transition:var(--trans);flex-shrink:0;
+}
+.gm-close:hover{border-color:var(--rd);color:var(--rd)}
+.gm-tabs{
+  display:flex;
+  border-bottom:1px solid var(--brd);
+  background:var(--bg3);
+  overflow-x:auto;
+  gap:0;
+}
+.gm-tab{
+  background:none;
+  border:none;
+  color:var(--txt3);
+  font-size:12px;
+  font-weight:600;
+  padding:10px 18px;
+  cursor:pointer;
+  white-space:nowrap;
+  border-bottom:2px solid transparent;
+  transition:var(--trans);
+}
+.gm-tab:hover{color:var(--txt)}
+.gm-tab.active{color:var(--cy);border-bottom-color:var(--cy)}
+.gm-body{
+  padding:24px;
+  display:none;
+  flex-direction:column;
+  gap:20px;
+}
+.gm-body.active{display:flex}
+.gm-sec-title{
+  font-size:12px;
+  font-weight:700;
+  color:var(--cy);
+  text-transform:uppercase;
+  letter-spacing:1px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:10px;
+}
+.gm-sec-title::after{
+  content:'';
+  flex:1;height:1px;
+  background:linear-gradient(to right,rgba(0,255,221,.4),transparent);
+}
+.gm-step{
+  display:flex;
+  gap:14px;
+  background:var(--bg3);
+  border:1px solid var(--brd);
+  border-radius:var(--rad2);
+  padding:14px;
+  align-items:flex-start;
+}
+.gm-step-num{
+  background:linear-gradient(135deg,var(--ac),var(--cy));
+  color:#000;
+  width:28px;height:28px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:13px;
+  flex-shrink:0;
+}
+.gm-step h4{font-size:13px;font-weight:700;color:var(--txt);margin-bottom:5px}
+.gm-step p,.gm-step li{font-size:12px;color:var(--txt2);line-height:1.7}
+.gm-step ul{padding-left:16px}
+.gm-card{
+  background:var(--bg3);
+  border:1px solid var(--brd);
+  border-radius:var(--rad2);
+  padding:14px;
+}
+.gm-card h4{font-size:13px;font-weight:700;color:var(--txt);margin-bottom:8px}
+.gm-card p,.gm-card li{font-size:12px;color:var(--txt2);line-height:1.7}
+.gm-card ul{padding-left:16px}
+.combo-tbl{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+.combo-tbl th{
+  background:rgba(201,63,255,.15);
+  color:var(--ac);
+  font-weight:700;
+  text-align:left;
+  padding:9px 12px;
+  border:1px solid var(--brd2);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+  white-space:nowrap;
+}
+.combo-tbl td{
+  padding:9px 12px;
+  border:1px solid var(--brd);
+  color:var(--txt);
+  vertical-align:top;
+  line-height:1.5;
+}
+.combo-tbl tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+.combo-tbl tr:hover td{background:rgba(0,255,221,.04)}
+.tpill{
+  display:inline-block;
+  border-radius:20px;
+  padding:2px 8px;
+  font-size:10px;
+  font-weight:700;
+  margin:1px;
+  white-space:nowrap;
+}
+.tp-ye{background:rgba(255,214,0,.15);color:var(--ye);border:1px solid rgba(255,214,0,.35)}
+.tp-ac{background:rgba(201,63,255,.15);color:var(--ac);border:1px solid rgba(201,63,255,.35)}
+.tp-cy{background:rgba(0,255,221,.1);color:var(--cy);border:1px solid rgba(0,255,221,.3)}
+.tp-gr{background:rgba(57,255,20,.1);color:var(--gr);border:1px solid rgba(57,255,20,.3)}
+.tp-or{background:rgba(255,122,0,.15);color:var(--or);border:1px solid rgba(255,122,0,.35)}
+.tp-pi{background:rgba(255,110,199,.15);color:var(--pi);border:1px solid rgba(255,110,199,.35)}
+.engine-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:12px;
+}
+.eng-card{
+  background:var(--bg3);
+  border:1px solid var(--brd);
+  border-radius:var(--rad2);
+  padding:14px;
+}
+.eng-card-head{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:8px;
+}
+.eng-card-icon{
+  font-size:20px;
+}
+.eng-card h4{font-size:13px;font-weight:700;color:var(--txt)}
+.eng-card .eng-tag{font-size:10px;color:var(--txt3)}
+.eng-card ul{padding-left:14px}
+.eng-card li{font-size:11px;color:var(--txt2);line-height:1.7;margin-bottom:2px}
+.eng-card code{background:var(--bg4);border-radius:3px;padding:0 4px;font-size:10px;color:var(--ye)}
+.plat-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:12px;
+}
+.plat-card{
+  background:var(--bg3);
+  border:1px solid var(--brd);
+  border-radius:var(--rad2);
+  padding:14px;
+}
+.plat-card h4{font-size:12px;font-weight:700;color:var(--txt);margin-bottom:6px}
+.plat-card li{font-size:11px;color:var(--txt2);line-height:1.7}
+.plat-card ul{padding-left:14px}
+.flow-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.flow-item{
+  background:var(--bg4);
+  border:1px solid var(--brd2);
+  border-radius:var(--rad);
+  padding:8px 14px;
+  font-size:12px;
+  color:var(--txt);
+  text-align:center;
+}
+.flow-arrow{color:var(--ac);font-size:18px;font-weight:700}
+.gm-table-wrap{overflow-x:auto}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="logo">
+    <div class="logo-icon">🎨</div>
+    <div>
+      <div class="logo-text">Sticker Prompt Studio</div>
+      <div class="logo-sub">AI Prompt Generator for Print-on-Demand</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="btn-guide" onclick="S.openGuide()">📖 Panduan</button>
+    <span class="badge">65 Categories</span>
+    <span class="badge">6 Engines</span>
+    <span class="badge v">v5.3</span>
+  </div>
+</header>
+
+<!-- MAIN WRAP -->
+<div class="main-wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <!-- MODE BAR -->
+    <div class="mode-bar">
+      <div class="mode-label">⚡ Mode</div>
+      <div class="mode-pill">
+        <button class="mode-pill-btn active" id="simpleModeBtn" onclick="S.setMode('simple')">Simple</button>
+        <button class="mode-pill-btn" id="expertModeBtn" onclick="S.setMode('expert')">Expert</button>
+      </div>
+    </div>
+
+    <!-- QUICK START PANEL -->
+    <div class="qs-panel">
+      <div class="qs-title">⚡ Quick Start — 1 Klik Generate</div>
+      <div class="qs-grid" id="qsGrid"></div>
+    </div>
+
+    <!-- PLATFORM (Simple: compact pills | Expert: full grid) -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Platform Jual</div>
+      <div class="plat-simple" id="platSimple">
+        <button class="plat-simple-btn active" data-plat="etsy" onclick="S.setPlatform('etsy')">🛍️ Etsy</button>
+        <button class="plat-simple-btn" data-plat="redbubble" onclick="S.setPlatform('redbubble')">🫧 Redbubble</button>
+        <button class="plat-simple-btn" data-plat="shopee" onclick="S.setPlatform('shopee')">🛒 Shopee</button>
+        <button class="plat-simple-btn" data-plat="line" onclick="S.setPlatform('line')">💬 LINE</button>
+        <button class="plat-simple-btn" data-plat="whatsapp" onclick="S.setPlatform('whatsapp')">📱 WhatsApp</button>
+        <button class="plat-simple-btn" data-plat="dtf" onclick="S.setPlatform('dtf')">👕 DTF</button>
+      </div>
+    </div>
+
+    <!-- ENGINE (Simple: 3 utama | Expert: semua) -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">AI Engine</div>
+      <!-- Simple: 3 engine utama -->
+      <div class="engine-simple" id="engineSimple">
+        <button class="eng-simple-btn active" data-eng="mj" onclick="S.setEngine('mj')">
+          <span class="eng-ic">🎨</span>Midjourney
+        </button>
+        <button class="eng-simple-btn" data-eng="gem" onclick="S.setEngine('gem')">
+          <span class="eng-ic">✨</span>Gemini
+        </button>
+        <button class="eng-simple-btn" data-eng="nb2" onclick="S.setEngine('nb2')">
+          <span class="eng-ic">🇮🇩</span>NB2 ID
+        </button>
+        <button class="eng-simple-btn" data-eng="en2" onclick="S.setEngine('en2')">
+          <span class="eng-ic">🇬🇧</span>EN Struct
+        </button>
+        <button class="eng-simple-btn" data-eng="flow" onclick="S.setEngine('flow')">
+          <span class="eng-ic">🌊</span>Flow
+        </button>
+        <button class="eng-simple-btn" data-eng="leo" onclick="S.setEngine('leo')">
+          <span class="eng-ic">🦁</span>Leonardo
+        </button>
+      </div>
+      <!-- Expert: all tabs (hidden in simple) -->
+      <div class="engine-tabs expert-only" id="engineExpert" style="margin-top:8px;display:none">
+        <button class="eng-btn active" data-eng2="mj" onclick="S.setEngine('mj')">Midjourney</button>
+        <button class="eng-btn" data-eng2="nb2" onclick="S.setEngine('nb2')">NB2 ID</button>
+        <button class="eng-btn" data-eng2="en2" onclick="S.setEngine('en2')">EN Struct</button>
+        <button class="eng-btn" data-eng2="gem" onclick="S.setEngine('gem')">Gemini</button>
+        <button class="eng-btn" data-eng2="flow" onclick="S.setEngine('flow')">Flow</button>
+        <button class="eng-btn" data-eng2="sd" onclick="S.setEngine('sd')">Stable Diffusion</button>
+        <button class="eng-btn" data-eng2="leo" onclick="S.setEngine('leo')">Leonardo</button>
+      </div>
+    </div>
+
+    <!-- CATEGORY -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Category</div>
+      <input type="text" class="cat-search" id="catSearch" placeholder="🔍 Search category..." oninput="S.filterCats(this.value)">
+      <div class="month-filter" id="monthFilter">
+        <button class="month-btn active" data-month="all" onclick="S.filterByMonth('all')">All</button>
+        <button class="month-btn" data-month="1" onclick="S.filterByMonth('1')">Jan</button>
+        <button class="month-btn" data-month="2" onclick="S.filterByMonth('2')">Feb</button>
+        <button class="month-btn" data-month="3" onclick="S.filterByMonth('3')">Mar</button>
+        <button class="month-btn" data-month="4" onclick="S.filterByMonth('4')">Apr</button>
+        <button class="month-btn" data-month="5" onclick="S.filterByMonth('5')">May</button>
+        <button class="month-btn" data-month="6" onclick="S.filterByMonth('6')">Jun</button>
+        <button class="month-btn" data-month="7" onclick="S.filterByMonth('7')">Jul</button>
+        <button class="month-btn" data-month="8" onclick="S.filterByMonth('8')">Aug</button>
+        <button class="month-btn" data-month="9" onclick="S.filterByMonth('9')">Sep</button>
+        <button class="month-btn" data-month="10" onclick="S.filterByMonth('10')">Oct</button>
+        <button class="month-btn" data-month="11" onclick="S.filterByMonth('11')">Nov</button>
+        <button class="month-btn" data-month="12" onclick="S.filterByMonth('12')">Dec</button>
+        <button class="month-btn" data-month="0" onclick="S.filterByMonth('0')">Ever</button>
+      </div>
+      <div class="cat-grid" id="catGrid"></div>
+    </div>
+
+    <!-- STICKER TECH -->
+    <div class="sidebar-section expert-only">
+      <div class="sidebar-title">Sticker Technical</div>
+      <div class="tech-grid">
+        <div class="tech-group">
+          <label>Cut Type</label>
+          <select id="selCut" onchange="S.setCut(this.value)">
+            <option value="die_cut">Die-Cut</option>
+            <option value="kiss_cut">Kiss-Cut</option>
+            <option value="square">Square</option>
+            <option value="circle">Circle</option>
+            <option value="washi">Washi Tape</option>
+          </select>
+        </div>
+        <div class="tech-group">
+          <label>Finish</label>
+          <select id="selFinish" onchange="S.setFinish(this.value)">
+            <option value="glossy">Glossy</option>
+            <option value="matte">Matte</option>
+            <option value="holographic">Holographic</option>
+            <option value="clear">Clear/Transparent</option>
+            <option value="glitter">Glitter</option>
+          </select>
+        </div>
+        <div class="tech-group">
+          <label>Size Preset</label>
+          <select id="selSize" onchange="S.setSize(this.value)">
+            <option value="2in">2" (50mm)</option>
+            <option value="3in">3" (75mm)</option>
+            <option value="4in" selected>4" (100mm)</option>
+            <option value="line370">LINE 370×320px</option>
+            <option value="wa512">WA 512×512px</option>
+            <option value="print8k">8000px Print</option>
+          </select>
+        </div>
+        <div class="tech-group">
+          <label>Outline Style</label>
+          <select id="selOutline" onchange="S.setOutline(this.value)">
+            <option value="ultra_black">Ultra Black</option>
+            <option value="white_halo">White Halo</option>
+            <option value="scalloped">Scalloped</option>
+            <option value="double">Double Line</option>
+            <option value="neon_glow">Neon Glow</option>
+            <option value="no_outline">No Outline</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMMERCIAL SAFE MODE -->
+    <div class="sidebar-section expert-only">
+      <div class="commercial-bar">
+        <div>
+          <div class="commercial-label">⚖️ Commercial Safe Mode</div>
+          <div class="commercial-sub">Aktifkan untuk karakter berlisensi (Pokemon, Sanrio)</div>
+        </div>
+        <label class="toggle-wrap">
+          <input type="checkbox" id="commercialToggle" onchange="S.toggleCommercial(this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- STICKER FORMAT -->
+    <div class="sidebar-section expert-only">
+      <div class="sidebar-title">Sticker Format</div>
+      <div class="format-toggle">
+        <button class="fmt-btn active" data-fmt="single" onclick="S.setFormat('single')">
+          <span class="fmt-ic">🏷️</span>
+          <span>Single Icon</span>
+        </button>
+        <button class="fmt-btn" data-fmt="sheet" onclick="S.setFormat('sheet')">
+          <span class="fmt-ic">📋</span>
+          <span>Sheet Pack</span>
+        </button>
+      </div>
+
+      <div class="sheet-panel" id="sheetPanel">
+        <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;font-family:'JetBrains Mono',monospace;">Grid Layout</div>
+        <div class="grid-options">
+          <button class="grid-btn" data-grid="6x4" data-count="24" onclick="S.setGrid('6x4',24)">
+            <span class="grid-label">6×4</span>
+            <span class="grid-count">(24)</span>
+          </button>
+          <button class="grid-btn" data-grid="4x4" data-count="16" onclick="S.setGrid('4x4',16)">
+            <span class="grid-label">4×4</span>
+            <span class="grid-count">(16)</span>
+          </button>
+          <button class="grid-btn" data-grid="5x5" data-count="25" onclick="S.setGrid('5x5',25)">
+            <span class="grid-label">5×5</span>
+            <span class="grid-count">(25)</span>
+          </button>
+          <button class="grid-btn" data-grid="8x4" data-count="32" onclick="S.setGrid('8x4',32)">
+            <span class="grid-label">8×4</span>
+            <span class="grid-count">(32)</span>
+          </button>
+          <button class="grid-btn" data-grid="6x6" data-count="36" onclick="S.setGrid('6x6',36)">
+            <span class="grid-label">6×6</span>
+            <span class="grid-count">(36)</span>
+          </button>
+          <button class="grid-btn active" data-grid="custom" data-count="0" onclick="S.setGrid('custom',0)">
+            <span class="grid-label">Custom</span>
+            <span class="grid-count">free</span>
+          </button>
+        </div>
+
+        <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;font-family:'JetBrains Mono',monospace;">Icon Count</div>
+        <div class="count-options">
+          <button class="cnt-btn" data-cnt="16" onclick="S.setCount(16)">16</button>
+          <button class="cnt-btn active" data-cnt="24" onclick="S.setCount(24)">24</button>
+          <button class="cnt-btn" data-cnt="25" onclick="S.setCount(25)">25</button>
+          <button class="cnt-btn" data-cnt="32" onclick="S.setCount(32)">32</button>
+          <button class="cnt-btn" data-cnt="36" onclick="S.setCount(36)">36</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VARIATION MODE -->
+    <div class="sidebar-section expert-only">
+      <div class="sidebar-title">Variation Mode</div>
+      <div class="var-modes">
+        <button class="var-btn active" data-var="standard" onclick="S.setVarMode('standard')">
+          <span class="var-icon">🎯</span>Standard
+        </button>
+        <button class="var-btn" data-var="expressions" onclick="S.setVarMode('expressions')">
+          <span class="var-icon">😄</span>Expression
+        </button>
+        <button class="var-btn" data-var="characters" onclick="S.setVarMode('characters')">
+          <span class="var-icon">🧸</span>Character
+        </button>
+        <button class="var-btn" data-var="accessories" onclick="S.setVarMode('accessories')">
+          <span class="var-icon">👜</span>Accessory
+        </button>
+        <button class="var-btn" data-var="seasonal" onclick="S.setVarMode('seasonal')">
+          <span class="var-icon">🌸</span>Seasonal
+        </button>
+        <button class="var-btn" data-var="sheet" onclick="S.setVarMode('sheet')">
+          <span class="var-icon">📋</span>Sheet×9
+        </button>
+      </div>
+    </div>
+
+    <!-- MODIFIERS -->
+    <div class="sidebar-section expert-only">
+      <div class="sidebar-title">Style Modifiers</div>
+      <div class="mods-grid" id="modsGrid"></div>
+    </div>
+
+    <!-- QUICK TEMPLATES -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Quick Templates</div>
+      <div class="tpl-grid" id="tplGrid"></div>
+    </div>
+
+  </aside>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <div class="cat-info">
+        <div class="cat-big-icon" id="catBigIcon">🌸</div>
+        <div class="cat-meta">
+          <div class="cat-name" id="catNameDisplay">Dark Kawaii</div>
+          <div class="cat-sub" id="catSubDisplay">Gothic cute characters with dark aesthetic</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="btn btn-outline btn-sm" onclick="S.clearHistory()">🗑 Clear History</button>
+        <button class="btn btn-ye btn-sm" onclick="S.generateVariations()">⚡ Generate 30 Vars</button>
+        <button class="btn btn-primary" onclick="S.generate()">✨ Generate Prompt</button>
+      </div>
+    </div>
+
+    <!-- STAT ROW -->
+    <div class="stat-row" id="statRow">
+      <span class="stat-chip">Platform: <span class="sc-val" id="scPlat">Etsy</span></span>
+      <span class="stat-chip">Engine: <span class="sc-val" id="scEng">Midjourney</span></span>
+      <span class="stat-chip">Category: <span class="sc-val" id="scCat">dark_kawaii</span></span>
+      <span class="stat-chip">Cut: <span class="sc-val" id="scCut">die-cut</span></span>
+      <span class="stat-chip">Finish: <span class="sc-val" id="scFinish">glossy</span></span>
+      <span class="stat-chip">Format: <span class="sc-val" id="scFormat">Single</span></span>
+      <span class="stat-chip">Vars: <span class="sc-val" id="scVars">0</span> generated</span>
+    </div>
+
+    <!-- COPY ALL BAR -->
+    <div class="copy-all-bar">
+      <button class="btn btn-outline btn-xs" onclick="S.copyAll()">📋 Copy All Prompts</button>
+      <button class="btn btn-outline btn-xs" onclick="S.exportJSON()">💾 Export JSON</button>
+    </div>
+
+    <!-- OUTPUT TABS -->
+    <div class="output-tabs" id="outputTabs">
+      <div class="out-tab active" data-tab="prompt" onclick="S.setTab('prompt')">
+        <span class="tab-dot"></span>Prompt Output
+      </div>
+      <div class="out-tab" data-tab="variations" onclick="S.setTab('variations')">
+        <span class="tab-dot"></span>Variations
+      </div>
+      <div class="out-tab" data-tab="seo" onclick="S.setTab('seo')">
+        <span class="tab-dot"></span>SEO Panel
+      </div>
+      <div class="out-tab" data-tab="history" onclick="S.setTab('history')">
+        <span class="tab-dot"></span>History
+      </div>
+      <div class="out-tab" data-tab="tips" onclick="S.setTab('tips')">
+        <span class="tab-dot"></span>Tips & Guide
+      </div>
+    </div>
+
+    <!-- OUTPUT AREA -->
+    <div class="output-area" id="outputArea">
+      <div class="empty">
+        <div class="empty-icon">🎨</div>
+        <p style="font-size:14px;font-weight:600;margin-bottom:8px">Pilih kategori → klik <strong>✨ Generate Prompt</strong></p>
+        <p style="font-size:12px;color:var(--txt3)">Atau gunakan <strong>Quick Start</strong> di sidebar untuk langsung generate<br>dengan setting terbaik tanpa perlu konfigurasi manual</p>
+        <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button onclick="S.openGuide()" style="background:rgba(0,255,221,.1);border:1px solid var(--cy);border-radius:var(--rad);color:var(--cy);font-size:12px;font-weight:700;padding:8px 16px;cursor:pointer">📖 Baca Panduan Lengkap</button>
+          <button onclick="S.setTab('tips')" style="background:rgba(201,63,255,.1);border:1px solid var(--ac);border-radius:var(--rad);color:var(--ac);font-size:12px;font-weight:700;padding:8px 16px;cursor:pointer">💡 Tips & Guide</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+// CATEGORY DATA — 57 categories
+// month: [1-12] = Jan-Dec, 0 = evergreen
+// demand: 'hi' | 'md' | 'lo'
+// ══════════════════════════════════════════════════
+const CATS = [
+  {id:'dark_kawaii',i:'🖤',t:'Dark Kawaii',sub:'Gothic cute with dark aesthetic',month:0,demand:'md',
+   core:'gothic cute character, pastel goth palette, big shiny eyes, melancholic expression',
+   keywords:['pastel goth','gothic kawaii','dark cute','sad eyes','moon motif','bat wings','coffin','spiderweb'],
+   neg:'ugly, deformed, text, watermark, realistic',
+   seoBase:'dark kawaii sticker gothic cute pastel goth aesthetic',
+   vars:['holding skull','moon crown','bat wings outfit','coffin phone','spider friend','dark bouquet','cemetery tea','broken heart']},
+
+  {id:'food_cute',i:'🍰',t:'Food Cute',sub:'Adorable kawaii food characters',month:0,demand:'hi',
+   core:'kawaii food character with cute face, chibi style, pastel colors, happy expression',
+   keywords:['kawaii food','chibi','pastel','boba tea','sushi face','ramen bowl','donut character','macaron'],
+   neg:'realistic food, ugly, deformed, text, watermark',
+   seoBase:'kawaii food sticker cute chibi pastel food character',
+   vars:['boba tea','sushi roll','ramen bowl','donut','macaron','ice cream','pizza slice','strawberry cake']},
+
+  {id:'cottagecore_frog',i:'🐸',t:'Cottagecore Frog',sub:'Cozy frog in nature aesthetic',month:0,demand:'md',
+   core:'cute frog character, cottagecore aesthetic, mushroom and flower setting, watercolor style',
+   keywords:['frog sticker','cottagecore','mushroom','wildflower','cozy','forest','mossy','vintage botanical'],
+   neg:'ugly, scary, realistic, text, watermark',
+   seoBase:'cottagecore frog sticker mushroom nature cute cozy',
+   vars:['rain hat frog','mushroom house','flower crown','reading frog','tea party','stargazing','pond lily','berry picking']},
+
+  {id:'batik_fusion',i:'🦚',t:'Batik Fusion',sub:'Indonesian batik meets modern kawaii',
+   core:'batik pattern fusion, traditional Indonesian motif, modern kawaii character overlay, intricate ornamental',
+   keywords:['batik','Indonesian art','Javanese pattern','parang motif','kawaii fusion','heritage','ornamental'],
+   neg:'ugly, deformed, text, watermark, plain',
+   seoBase:'batik fusion sticker Indonesian traditional pattern kawaii',
+   vars:['parang motif','mega mendung','kawung circle','truntum flower','sidomukti','sekar jagad','ceplok','sogan palette']},
+
+  {id:'islamic_art',i:'☪️',t:'Islamic Art',sub:'Geometric Islamic pattern stickers',month:0,demand:'md',
+   core:'Islamic geometric art, arabesque pattern, star polygon, mosque silhouette, calligraphy element',
+   keywords:['Islamic art','arabesque','geometric','mosque','crescent','star polygon','calligraphy','Ramadan'],
+   neg:'figurative, face, person, ugly, text, watermark',
+   seoBase:'Islamic art sticker geometric arabesque mosque pattern',
+   vars:['star polygon','crescent moon','mosque dome','arabesque border','geometric tile','lantern silhouette','palm motif','prayer beads']},
+
+  {id:'zodiac_astrology',i:'♋',t:'Zodiac Astrology',sub:'Mystical zodiac sign stickers',
+   core:'zodiac constellation character, mystical astrology aesthetic, celestial sparkles, cosmic background',
+   keywords:['zodiac','astrology','constellation','celestial','stars','cosmic','horoscope','birth chart'],
+   neg:'ugly, deformed, realistic, text, watermark',
+   seoBase:'zodiac astrology sticker constellation celestial cosmic',
+   vars:['Aries ram','Taurus bull','Gemini twins','Cancer crab','Leo lion','Virgo maiden','Libra scales','Scorpio scorpion']},
+
+  {id:'nurse_medical',i:'🏥',t:'Nurse & Medical',sub:'Healthcare themed cute stickers',
+   core:'cute nurse character, medical kawaii, chibi healthcare professional, pastel medical aesthetic',
+   keywords:['nurse sticker','medical kawaii','chibi nurse','healthcare','stethoscope','pill capsule','bandage','heart rate'],
+   neg:'scary, gore, realistic, text, watermark',
+   seoBase:'cute nurse medical sticker kawaii healthcare chibi',
+   vars:['nurse chibi','doctor bear','stethoscope charm','pill heart','bandage bunny','syringe fairy','heartbeat cat','hospital planner']},
+
+  {id:'teacher_school',i:'📚',t:'Teacher School',sub:'Education themed sticker pack',
+   core:'cute teacher character, school kawaii, classroom aesthetic, apple pencil notebook motifs',
+   keywords:['teacher sticker','school kawaii','classroom','apple','pencil','notebook','chalkboard','graduation'],
+   neg:'boring, plain, ugly, text, watermark',
+   seoBase:'teacher school sticker kawaii education classroom cute',
+   vars:['apple teacher','pencil character','notebook fairy','globe buddy','chalkboard cat','graduation bear','ruler dragon','school bus']},
+
+  {id:'kpop_korean',i:'🎤',t:'K-Pop Korean',sub:'Korean idol aesthetic stickers',
+   core:'K-pop idol character, cute Korean aesthetic, pastel idol outfit, light stick, fan art style',
+   keywords:['kpop sticker','Korean idol','bias','light stick','fan art','pastel idol','aegyo','hanbok'],
+   neg:'ugly, deformed, realistic, text, watermark',
+   seoBase:'kpop korean sticker idol aesthetic cute fan art',
+   vars:['light stick wave','fan cheer','bias heart','idol outfit','hanbok character','comeback poster','fan letter','concert glow']},
+
+  {id:'ramadan_eid',i:'🌙',t:'Ramadan & Eid Fitri',sub:'Islamic celebration stickers',month:3,demand:'hi',
+   core:'Ramadan crescent lantern character, Eid Fitri Lebaran celebration kawaii, Islamic festive aesthetic, warm golden palette, ketupat opor ayam',
+   keywords:['Ramadan','Eid Mubarak','Idul Fitri','Lebaran','lantern','crescent','mosque','ketupat','kurma','takbir','fanous'],
+   neg:'figurative prophet, text inside design, watermark',
+   seoBase:'Ramadan Eid Fitri Lebaran sticker Islamic celebration kawaii lantern ketupat',
+   vars:['fanous lantern','ketupat pattern','crescent star','mosque silhouette','dates palm','Ramadan calendar','Eid card','iftar feast','baju koko character','hamper lebaran','angpao eid','open house family']},
+
+  {id:'line_expression',i:'💬',t:'LINE Expression',sub:'Chat sticker emotions 370×320',
+   core:'LINE messenger expression sticker, single emotion character, bold outline, white background, 370x320 canvas',
+   keywords:['LINE sticker','expression','emotion','chat sticker','messaging','reaction','chibi face'],
+   neg:'complex background, tiny detail, text, watermark',
+   seoBase:'LINE sticker expression emotion chat reaction kawaii',
+   vars:['happy bounce','love eyes','crying waterfall','angry steam','sleepy zzz','shocked face','thumbs up','waving bye']},
+
+  {id:'sport_hobby',i:'⚽',t:'Sport & Hobby',sub:'Active lifestyle sticker pack',
+   core:'cute sporty character, hobby kawaii chibi, athletic aesthetic, energetic pose, pastel sport palette',
+   keywords:['sport sticker','hobby kawaii','athlete chibi','basketball','soccer','yoga','gaming','art palette'],
+   neg:'ugly, deformed, realistic, text, watermark',
+   seoBase:'sport hobby sticker kawaii athletic chibi activity',
+   vars:['basketball dunk','soccer kick','yoga pose','gaming setup','art palette','music note','book reader','camera click']},
+
+  {id:'chibi_couple',i:'💑',t:'Chibi Couple',sub:'Matching couple sticker set',
+   core:'matching chibi couple stickers, valentines aesthetic, love theme, coordinated outfits, pastel romance',
+   keywords:['couple sticker','matching chibi','valentines','love','romance','heart','boyfriend girlfriend','anniversary'],
+   neg:'suggestive, adult, ugly, deformed, text, watermark',
+   seoBase:'couple sticker matching chibi valentines love romance',
+   vars:['first date','holding hands','matching outfits','sharing boba','movie night','love letter','anniversary cake','stargazing together']},
+
+  {id:'transparent_aesthetic',i:'🫧',t:'Transparent Aesthetic',sub:'Clear sticker minimalist style',
+   core:'minimal line art character, transparent sticker aesthetic, delicate thin outlines, white space design',
+   keywords:['transparent sticker','clear sticker','minimal','line art','aesthetic','delicate','thin outline'],
+   neg:'opaque background, thick outline, complex, text, watermark',
+   seoBase:'transparent clear sticker aesthetic minimal line art',
+   vars:['floral frame','butterfly wing','moon phase','star map','leaf botanical','wave pattern','cloud minimal','crystal gem']},
+
+  {id:'planner_bujo',i:'📓',t:'Planner & BuJo',sub:'Bullet journal planning stickers',
+   core:'cute planner sticker, bullet journal aesthetic, functional kawaii, checklist and habit tracker motifs',
+   keywords:['planner sticker','bullet journal','bujo','habit tracker','checklist','calendar','productivity','cute planner'],
+   neg:'ugly, boring, text, watermark',
+   seoBase:'planner sticker bullet journal bujo kawaii productivity',
+   vars:['weekly spread','habit tracker','mood chart','water tracker','grocery list','to-do cute','goal star','focus timer']},
+
+  {id:'fairy_forest',i:'🧚',t:'Fairy Forest',sub:'Enchanted woodland fairy stickers',
+   core:'tiny fairy character, enchanted forest aesthetic, mushroom glade, sparkle dust, dreamy soft palette',
+   keywords:['fairy sticker','enchanted forest','woodland','mushroom','sparkle','pixie','butterfly','flower fairy'],
+   neg:'scary, dark, realistic, text, watermark',
+   seoBase:'fairy forest sticker enchanted woodland mushroom sparkle',
+   vars:['mushroom fairy','flower pixie','butterfly wings','acorn house','dewdrop magic','moonlit glade','firefly glow','leaf boat']},
+
+  {id:'space_galaxy',i:'🚀',t:'Space Galaxy',sub:'Cosmic astronaut adventure stickers',
+   core:'cute astronaut chibi, space aesthetic, galaxy colors, planet and star motifs, cosmic adventure',
+   keywords:['space sticker','astronaut kawaii','galaxy','planet','stars','cosmic','nebula','rocket ship'],
+   neg:'realistic space, ugly, deformed, text, watermark',
+   seoBase:'space galaxy sticker astronaut kawaii cosmic planet',
+   vars:['floating astronaut','saturn ring','moon crater','shooting star','nebula swirl','rocket launch','alien friend','space cat']},
+
+  {id:'ocean_mermaid',i:'🧜',t:'Ocean Mermaid',sub:'Under-the-sea mermaid stickers',
+   core:'cute mermaid character, ocean aesthetic, coral reef setting, shimmery scales, underwater sparkle',
+   keywords:['mermaid sticker','ocean kawaii','coral reef','seashell','pearl','underwater','scales','jellyfish'],
+   neg:'scary, dark, realistic, text, watermark',
+   seoBase:'mermaid ocean sticker kawaii underwater coral reef',
+   vars:['mermaid tail','coral crown','jellyfish friend','seahorse buddy','pearl clam','ocean wave','starfish charm','deep sea glow']},
+
+  {id:'witch_magic',i:'🧙',t:'Witch & Magic',sub:'Witchy spooky magical stickers',
+   core:'cute witch character, magical potion aesthetic, cauldron and crystal ball, spooky cute style',
+   keywords:['witch sticker','magic kawaii','potion','cauldron','crystal ball','spooky cute','broom','black cat'],
+   neg:'scary, horror, ugly, realistic, text, watermark',
+   seoBase:'witch magic sticker kawaii spooky cute potion cauldron',
+   vars:['witch hat','cauldron brew','crystal ball','broom ride','black cat','moon jar','spell book','potion bottle']},
+
+  {id:'cat_universe',i:'🐱',t:'Cat Universe',sub:'Cat in various cute scenarios',
+   core:'chibi cat character, kawaii cat universe, various cat themed scenarios, soft rounded shapes',
+   keywords:['cat sticker','chibi cat','kawaii cat','neko','catloaf','cat paw','sleeping cat','cat in cup'],
+   neg:'realistic cat, ugly, deformed, text, watermark',
+   seoBase:'cat sticker kawaii chibi neko cute cat universe',
+   vars:['catloaf','cup cat','space cat','witch cat','ramen cat','flower crown cat','gaming cat','sleepy cat']},
+
+  {id:'dog_friends',i:'🐶',t:'Dog Friends',sub:'Cute dog breed sticker pack',
+   core:'cute dog breed character, kawaii puppy chibi, friendly expression, soft pastel palette',
+   keywords:['dog sticker','puppy kawaii','chibi dog','shiba','corgi','poodle','golden retriever','dachshund'],
+   neg:'scary dog, realistic, ugly, text, watermark',
+   seoBase:'dog sticker kawaii puppy chibi cute breed',
+   vars:['shiba inu','corgi butt','poodle cloud','golden smile','dachshund stretch','pug face','husky howl','dalmatian spot']},
+
+  {id:'flower_botanical',i:'🌸',t:'Flower Botanical',sub:'Delicate floral botanical stickers',
+   core:'botanical illustration sticker, delicate flower arrangement, watercolor floral, soft natural palette',
+   keywords:['botanical sticker','floral','watercolor flower','garden','rose','daisy','lavender','wildflower'],
+   neg:'synthetic, neon, ugly, text, watermark',
+   seoBase:'botanical flower sticker floral watercolor garden',
+   vars:['rose bouquet','lavender sprig','daisy field','cherry blossom','sunflower face','peony bloom','wildflower mix','pressed flower']},
+
+  {id:'retro_vintage',i:'📼',t:'Retro Vintage',sub:'80s/90s nostalgia aesthetic stickers',
+   core:'retro vintage aesthetic sticker, 80s 90s nostalgia, cassette tape VHS camcorder motifs, warm retro palette',
+   keywords:['retro sticker','vintage','80s','90s','cassette','VHS','polaroid','nostalgic aesthetic'],
+   neg:'modern, futuristic, ugly, text, watermark',
+   seoBase:'retro vintage sticker 80s 90s nostalgia cassette aesthetic',
+   vars:['cassette tape','VHS player','polaroid frame','retro phone','disco ball','pac-man ghost','walkman','neon sign']},
+
+  {id:'minimalist_line',i:'✏️',t:'Minimalist Line',sub:'Clean minimal line art stickers',
+   core:'minimalist line art sticker, single continuous line drawing, negative space design, monochrome or two-tone',
+   keywords:['minimal sticker','line art','monochrome','clean design','simple','contour','negative space'],
+   neg:'complex, colorful, detailed, text, watermark',
+   seoBase:'minimalist line art sticker clean simple monochrome',
+   vars:['one line face','mountain outline','wave line','leaf contour','bird silhouette','sun minimal','moon crescent','heart line']},
+
+  {id:'chibi_superhero',i:'🦸',t:'Chibi Superhero',sub:'Miniature superhero character stickers',
+   core:'chibi superhero character, mini hero aesthetic, cape and mask, dynamic pose, vibrant comic palette',
+   keywords:['chibi hero','mini superhero','cape','mask','comic style','power pose','colorful','hero badge'],
+   neg:'violent, dark, realistic, text, watermark',
+   seoBase:'chibi superhero sticker mini hero kawaii comic',
+   vars:['cape pose','shield hold','power fist','flying hero','hero badge','villain pout','sidekick duo','power symbol']},
+
+  {id:'motivational_quote',i:'✨',t:'Motivational Quote',sub:'Aesthetic quote art stickers',
+   core:'aesthetic motivational quote sticker, hand lettered typography style, floral border, inspirational art',
+   keywords:['quote sticker','motivational','hand lettered','typography art','inspirational','positive vibes'],
+   neg:'negative message, ugly font, text errors, watermark',
+   seoBase:'motivational quote sticker aesthetic hand lettered inspirational',
+   vars:['you got this','be kind','dream big','stay weird','positive vibes','breathe','choose joy','shine bright']},
+
+  {id:'halloween_spooky',i:'🎃',t:'Halloween Spooky',sub:'Cute spooky halloween stickers',month:10,demand:'hi',
+   core:'cute halloween character, kawaii spooky aesthetic, jack-o-lantern ghost witch, pastel halloween palette',
+   keywords:['halloween sticker','spooky kawaii','ghost','pumpkin','witch','bat','skeleton','candy corn'],
+   neg:'scary horror, gore, ugly, realistic, text, watermark',
+   seoBase:'halloween spooky sticker kawaii cute ghost pumpkin',
+   vars:['kawaii ghost','pumpkin face','bat wings','witch brew','candy bucket','black cat','skeleton dance','haunted house mini']},
+
+  {id:'christmas_holiday',i:'🎄',t:'Christmas Holiday',sub:'Festive holiday christmas stickers',month:12,demand:'hi',
+   core:'cute christmas character, holiday kawaii, santa reindeer snowman, festive red green gold palette',
+   keywords:['christmas sticker','holiday kawaii','santa','snowman','reindeer','ornament','candy cane','gift'],
+   neg:'ugly, scary, text, watermark',
+   seoBase:'christmas holiday sticker kawaii cute santa festive',
+   vars:['santa chibi','snowman hug','reindeer fly','ornament ball','candy cane','gingerbread','elf helper','gift bow']},
+
+  {id:'birthday_party',i:'🎂',t:'Birthday Party',sub:'Celebration birthday sticker pack',
+   core:'birthday party kawaii sticker, celebration aesthetic, cake candle confetti balloon, festive pastel palette',
+   keywords:['birthday sticker','party kawaii','cake','balloon','confetti','celebration','happy birthday'],
+   neg:'sad, boring, ugly, text, watermark',
+   seoBase:'birthday party sticker kawaii celebration cake confetti',
+   vars:['birthday cake','balloon bunch','confetti pop','party hat','gift surprise','age number','wish star','party animal']},
+
+  {id:'travel_adventure',i:'✈️',t:'Travel Adventure',sub:'Wanderlust adventure stickers',
+   core:'cute travel character, adventure kawaii, passport suitcase map compass motifs, wanderlust aesthetic',
+   keywords:['travel sticker','adventure kawaii','suitcase','passport','map','compass','wanderlust','globe'],
+   neg:'scary, dangerous, ugly, text, watermark',
+   seoBase:'travel adventure sticker kawaii wanderlust suitcase map',
+   vars:['suitcase wave','passport stamp','map explorer','compass rose','airplane window','camera click','travel journal','world globe']},
+
+  {id:'mental_health',i:'💚',t:'Mental Health',sub:'Self-care wellness awareness stickers',
+   core:'self-care kawaii character, mental health awareness sticker, gentle encouragement, soft green palette, mindfulness',
+   keywords:['mental health sticker','self care','wellness','therapy','mindfulness','healing','breathe','green ribbon'],
+   neg:'triggering content, sad without hope, ugly, text, watermark',
+   seoBase:'mental health sticker self care wellness kawaii mindfulness',
+   vars:['breathe now','rest is ok','therapy bear','mindful moment','green ribbon','healing heart','soft hug','you matter']},
+
+  {id:'vintage_botanical_dark',i:'🌿',t:'Dark Botanical',sub:'Moody dark botanical stickers',
+   core:'dark academia botanical sticker, dried flower pressed art, moody green black palette, Victorian botanical illustration',
+   keywords:['dark botanical','moody plant','dried flower','Victorian','pressed plant','dark academia','green black'],
+   neg:'bright, colorful, kawaii, text, watermark',
+   seoBase:'dark botanical sticker moody Victorian dried flower academic',
+   vars:['dried rose','skull flower','moth botanical','midnight garden','fern shadow','dark mushroom','poison berry','raven branch']},
+
+  {id:'anime_chibi',i:'🌟',t:'Anime Chibi',sub:'Anime style chibi character stickers',
+   core:'anime chibi character sticker, Japanese animation style, expressive eyes, bright vibrant palette, dynamic pose',
+   keywords:['anime sticker','chibi character','kawaii anime','manga style','shojo','shonen','bishoujo','super deformed'],
+   neg:'ugly, western cartoon, realistic, text, watermark',
+   seoBase:'anime chibi sticker kawaii Japanese character manga',
+   vars:['blush chibi','battle pose','magical girl','sword fighter','idol chibi','delinquent','student uniform','festival yukata']},
+
+  {id:'nature_season',i:'🍂',t:'Nature Season',sub:'Four seasons nature stickers',
+   core:'seasonal nature sticker, four seasons aesthetic, spring cherry blossom summer sunflower autumn leaf winter snowflake',
+   keywords:['seasons sticker','nature kawaii','spring blossom','summer sun','autumn leaf','winter snow','seasonal'],
+   neg:'urban, indoor, ugly, text, watermark',
+   seoBase:'nature season sticker four seasons kawaii spring autumn',
+   vars:['spring blossom','summer sunflower','autumn maple','winter snowflake','rainy season','harvest moon','first snow','cherry blossom']},
+
+  {id:'music_band',i:'🎸',t:'Music Band',sub:'Rock band music themed stickers',
+   core:'cute music band character, kawaii musician chibi, guitar microphone headphone motifs, cool rock aesthetic',
+   keywords:['music sticker','band kawaii','guitarist','singer','drummer','rock star','headphones','concert'],
+   neg:'ugly, deformed, text, watermark',
+   seoBase:'music band sticker kawaii musician chibi guitar rock',
+   vars:['guitar hero','drum kit','microphone star','piano keys','headphone bear','vinyl record','concert crowd','rock on']},
+
+  {id:'gaming_retro',i:'🎮',t:'Gaming Retro',sub:'Video game pixel art stickers',
+   core:'retro gaming character sticker, pixel art aesthetic, 8-bit style, game controller power-up motifs',
+   keywords:['gaming sticker','pixel art','8-bit','retro game','controller','power-up','video game','arcade'],
+   neg:'modern 3D, realistic, ugly, text, watermark',
+   seoBase:'gaming retro sticker pixel art 8-bit arcade controller',
+   vars:['pixel character','game controller','power-up mushroom','health heart','level up star','game over screen','arcade cabinet','8-bit cat']},
+
+  {id:'fashion_trendy',i:'👗',t:'Fashion Trendy',sub:'OOTD fashion style stickers',
+   core:'fashion kawaii character, trendy OOTD aesthetic, outfit flat lay, streetwear chic style',
+   keywords:['fashion sticker','OOTD kawaii','trendy outfit','streetwear','chic','style icon','closet','fashionista'],
+   neg:'ugly, outdated, text, watermark',
+   seoBase:'fashion trendy sticker OOTD kawaii outfit streetwear',
+   vars:['OOTD flat lay','handbag charm','sneaker doll','sunglasses icon','shopping bags','runway pose','thrift haul','accessories spread']},
+
+  {id:'coffee_morning',i:'☕',t:'Coffee Morning',sub:'Coffee lover morning vibes stickers',
+   core:'kawaii coffee character, morning vibes aesthetic, latte art cappuccino cold brew, cozy warm palette',
+   keywords:['coffee sticker','morning kawaii','latte art','cappuccino','cold brew','barista','cozy cafe','coffee lover'],
+   neg:'ugly, deformed, text, watermark',
+   seoBase:'coffee morning sticker kawaii latte art cozy cafe',
+   vars:['latte art cat','cold brew bear','espresso shot','pastry pairing','morning ritual','coffee bean','barista rabbit','cafe corner']},
+
+  {id:'yoga_wellness',i:'🧘',t:'Yoga Wellness',sub:'Mindful yoga lifestyle stickers',
+   core:'cute yoga pose character, wellness aesthetic, chakra crystal mandala motifs, soft earth tone palette',
+   keywords:['yoga sticker','wellness kawaii','meditation','chakra','mandala','mindful','namaste','crystal'],
+   neg:'violent, chaotic, ugly, text, watermark',
+   seoBase:'yoga wellness sticker kawaii meditation chakra mindful',
+   vars:['lotus pose','tree pose','warrior stance','child pose','crystal heal','mandala center','chakra align','namaste hands']},
+
+  {id:'pride_rainbow',i:'🏳️‍🌈',t:'Pride Rainbow',sub:'Pride celebration rainbow stickers',
+   core:'pride rainbow kawaii character, inclusive celebration aesthetic, rainbow flag heart motifs, vibrant spectrum palette',
+   keywords:['pride sticker','rainbow kawaii','LGBTQ','inclusive','celebration','pride flag','love is love'],
+   neg:'hateful, exclusionary, ugly, text, watermark',
+   seoBase:'pride rainbow sticker kawaii inclusive celebration love',
+   vars:['rainbow heart','pride flag wave','ally hug','spectrum butterfly','love wins','rainbow crown','pride parade','spectrum cat']},
+
+  {id:'abstract_art',i:'🎨',t:'Abstract Art',sub:'Abstract expressionist sticker designs',
+   core:'abstract art sticker, expressive brushstroke, bold color blocking, contemporary art aesthetic',
+   keywords:['abstract sticker','expressionist','brushstroke','color block','contemporary','art movement','bold design'],
+   neg:'figurative, realistic, text, watermark',
+   seoBase:'abstract art sticker expressionist brushstroke color block',
+   vars:['color splash','geometry pop','drip art','texture layer','neon stroke','monochrome abstract','gradient wave','brush mark']},
+
+  {id:'zodiac_celtic',i:'🔮',t:'Celtic Mystical',sub:'Celtic knotwork mystical stickers',
+   core:'Celtic knotwork sticker, triple spiral triskelion, mystical ancient symbol, green gold dark palette',
+   keywords:['Celtic sticker','knotwork','triskelion','ancient','mystical','spiral','Claddagh','druid'],
+   neg:'plain, modern, text, watermark',
+   seoBase:'Celtic mystical sticker knotwork triskelion ancient symbol',
+   vars:['triple spiral','Celtic knot','Claddagh heart','rune symbol','oak leaf','green man',' Celtic border','druid moon']},
+
+  {id:'neon_cyberpunk',i:'⚡',t:'Neon Cyberpunk',sub:'Futuristic neon cyberpunk stickers',
+   core:'neon cyberpunk character, futuristic aesthetic, glitch effect, neon pink purple cyan palette, circuit board motifs',
+   keywords:['cyberpunk sticker','neon','futuristic','glitch','circuit','synthwave','retrowave','cyber'],
+   neg:'pastoral, nature, realistic, text, watermark',
+   seoBase:'neon cyberpunk sticker futuristic glitch synthwave neon',
+   vars:['neon samurai','cyber cat','glitch face','circuit board','neon skyline','hologram girl','data stream','neural link']},
+
+  {id:'bear_characters',i:'🐻',t:'Bear Characters',sub:'Various bear themed kawaii stickers',month:0,demand:'md',
+   core:'kawaii bear character, various bear themed expressions, rounded plump design, pastel bear palette',
+   keywords:['bear sticker','kawaii bear','panda','polar bear','brown bear','teddy bear','bear chibi'],
+   neg:'scary bear, realistic, ugly, text, watermark',
+   seoBase:'bear sticker kawaii chibi panda polar brown teddy',
+   vars:['panda munch','polar explorer','brown bear hug','honey bee bear','teddy care bear','bear in sweater','sleepy bear','bear picnic']},
+
+  // ── LICENSED CHARACTER STYLES ────────────────
+
+  {id:'pokemon_style',i:'🎮',t:'Pocket Creature Style',sub:'Pokemon-inspired kawaii creature (2 versions)',month:0,demand:'hi',
+   licensed:true,
+   core:'Pikachu kawaii chibi character, Pokemon style electric yellow mouse, thunder spark motif, Nintendo Pokemon aesthetic, Bulbasaur Charmander Squirtle Eevee style, collectible creature, game companion',
+   coreCommercial:'pocket creature kawaii chibi character, electric yellow mouse thunder spark, fire lizard flame tail, water turtle shell, grass seed bulb back, purple psychic cat, ice fox tail, collectible monster game aesthetic, friendly creature companion design',
+   keywords:['pocket creature','monster collector','electric mouse','fire dragon','water turtle','grass creature','psychic cat','game companion','kawaii creature'],
+   neg:'ugly, deformed, scary, realistic, copyright watermark, text, complex background',
+   seoBase:'pocket creature kawaii sticker monster collector chibi game character',
+   vars:['electric mouse thunder','fire lizard flame','water turtle shell','grass bulb sprout','eevee fox fluff','psychic cat spoon','ice weasel ribbon','ghost floating mischief','fairy pink wings','dragon fierce cute','normal cat nap','fighting punching gloves']},
+
+  {id:'sanrio_style',i:'🎀',t:'Sanrio-Inspired Pack',sub:'Hello Kitty · Kuromi · Melody · Cinnamoroll · Pompompurin',month:0,demand:'hi',
+   licensed:true,
+   core:'Hello Kitty Kuromi My Melody Cinnamoroll Pompompurin Sanrio character kawaii, white cat no mouth red bow, gothic bunny black hood skull motif, white bunny pink hood sweet, fluffy blue puppy cloud, golden retriever yellow beret, pastel palette soft',
+   coreCommercial:'Japanese kawaii character flat design: white cat no mouth with red bow on ear (no brand), gothic bunny with black hooded cape and skull motif, sweet white bunny wearing pink hood, fluffy blue cloud-like puppy, chubby golden puppy with yellow beret chef hat, Sanrio-inspired pastel aesthetic, flat kawaii illustration',
+   keywords:['sanrio style','kawaii japan','white cat bow','gothic bunny skull','sweet bunny hood','cloud puppy blue','golden puppy beret','japanese kawaii','pastel character','cute plush doll style'],
+   neg:'ugly, deformed, non-kawaii, scary, copyright text, brand logo, watermark',
+   seoBase:'sanrio inspired kawaii sticker japanese character pastel plush doll style',
+   vars:['white cat red bow (Hello Kitty style)','gothic bunny black hood skull (Kuromi style)','sweet bunny pink hood (My Melody style)','fluffy cloud puppy blue (Cinnamoroll style)','chubby golden puppy beret (Pompompurin style)','Keroppi frog green lily pad style','Badtz-Maru penguin spiky style','Chococat black cat four whiskers style','Little Twin Stars chibi star style','Gudetama lazy egg yellow style','Aggretsuko red panda rage style','Tuxedo Sam penguin bow tie style']},
+
+  // ── KIDS 4-7 TAHUN ───────────────────────────
+
+  {id:'kids_dino_animals',i:'🦕',t:'Kids Dino & Animals',sub:'Dinosaur & cute animals for kids age 4-7',month:0,demand:'hi',
+   ageTag:'4-7y',
+   core:'cute kawaii dinosaur sticker for children age 4-7, baby T-Rex Brontosaurus Triceratops Stegosaurus chibi, big sparkle eyes, friendly smile, simple rounded shape, soft pastel green blue purple, bold clean outline, simple design easy to recognize, kids sticker',
+   keywords:['dinosaur kids sticker','baby T-Rex','cute dino chibi','Brontosaurus kawaii','kids animal sticker','farm animal cute','jungle animal kawaii','sea creature kids','friendly dinosaur'],
+   neg:'scary, gore, blood, realistic, dark, violent, complex detail, text, watermark',
+   seoBase:'cute dinosaur kids sticker kawaii baby dino animal children age 4-7',
+   vars:['baby T-Rex tiny roar','smiling Brontosaurus long neck','friendly Triceratops three horns','Stegosaurus spiky back cute','cute elephant big ears','giraffe long neck spots','lion cub fluffy mane','penguin waddle tuxedo','baby shark open mouth','duckling yellow fluffy','bunny hop spring','frog lily pad green']},
+
+  {id:'kids_princess_unicorn',i:'👸',t:'Kids Princess & Unicorn',sub:'Princess fairy unicorn for girls age 4-7',month:0,demand:'hi',
+   ageTag:'4-7y',
+   core:'cute princess fairy unicorn sticker for girls age 4-7, crown tiara sparkle, rainbow magic wand, fairy butterfly wings, unicorn rainbow horn, pastel pink lavender mint palette, glitter star burst, chibi princess character, simple clean design, kids sticker',
+   keywords:['princess sticker kids','unicorn rainbow','fairy wings kawaii','tiara crown sparkle','magic wand stars','rainbow pony','fairy tale princess','mermaid princess','little girl sticker'],
+   neg:'scary, dark, violent, adult, realistic, complex, text, watermark',
+   seoBase:'princess unicorn kawaii sticker kids girls fairy rainbow crown sparkle',
+   vars:['rainbow unicorn sparkle horn','crown princess tiara gold','fairy butterfly wings pink','magic wand star burst','pink castle tower','rainbow bridge arch','mermaid tail scales','flower fairy garden','star fairy wand','pumpkin carriage Cinderella','crystal glass slipper','sleeping beauty rose']},
+
+  {id:'kids_vehicles_hero',i:'🚗',t:'Kids Vehicles & Heroes',sub:'Cars trucks heroes for boys age 4-7',month:0,demand:'hi',
+   ageTag:'4-7y',
+   core:'cute vehicle superhero sticker for children age 4-7, cartoon car truck rocket fire engine police car, happy smiling face on vehicle, bold primary red blue yellow colors, simple rounded shape, chibi superhero character, big head small body, bold black outline, kids sticker',
+   keywords:['kids car sticker','cute truck kawaii','fire engine chibi','police car kids','rocket ship space','superhero chibi kids','race car happy face','construction truck','school bus yellow'],
+   neg:'scary, violent, crash, dark, realistic, complex, adult, text, watermark',
+   seoBase:'cute car truck vehicle sticker kids chibi superhero race fire engine boys',
+   vars:['race car happy face red','fire truck rescue ladder','police car blue siren','school bus yellow full','dump truck construction yellow','rocket ship stars','helicopter propeller spin','submarine ocean deep','ambulance white red cross','tractor farm green','spaceship futuristic','superhero flying cape']},
+
+  {id:'kids_rainbow_edu',i:'🌈',t:'Kids Rainbow & Learning',sub:'Rainbow ABC numbers fruits for kids age 4-7',month:0,demand:'hi',
+   ageTag:'4-7y',
+   core:'rainbow educational kawaii sticker for children age 4-7, ABC letter with cute fruit face, number with animal, rainbow arc cloud, bright primary colors, bold simple shapes, learning fun, smiley face on objects, thick bold outline, digital sticker iPad GoodNotes friendly',
+   keywords:['kids learning sticker','rainbow kawaii','ABC letter fruit','number animal kids','shapes sticker cute','fruit face kawaii','color wheel kids','digital sticker goodnotes','ipad sticker kids'],
+   neg:'scary, dark, violent, complex, boring, adult, text inside, watermark',
+   seoBase:'rainbow learning sticker kids ABC number fruit digital iPad GoodNotes kawaii',
+   vars:['rainbow full arc cloud','letter A red apple smile','number 1 sunshine yellow','heart shape pink blush','star yellow sparkle eyes','watermelon slice smile','strawberry kawaii face','caterpillar color segments','butterfly wing pattern','cloud rain drops kawaii','sun rays happy face','mushroom polka dot red']},
+
+  // ── NEW MOMENT CATEGORIES ──────────────────────
+
+  {id:'idul_adha',i:'🐑',t:'Idul Adha / Qurban',sub:'Eid al-Adha Islamic sacrifice celebration',month:6,demand:'hi',
+   core:'Idul Adha celebration kawaii character, qurban sacrifice aesthetic, cute sapi kambing cow sheep chibi, takbir Allahu Akbar festive mood, warm golden green palette, family gathering Eid',
+   keywords:['Idul Adha','Qurban','Eid al-Adha','sapi kawaii','kambing chibi','takbir','hewan qurban','masjid','family celebration','Islamic festive','kurban'],
+   neg:'figurative prophet, gore, blood, realistic slaughter, text inside, watermark',
+   seoBase:'Idul Adha Qurban sticker kawaii Eid al-Adha Islamic celebration kambing sapi',
+   vars:['kawaii kambing/sheep chibi','cute sapi/cow waving','mosque silhouette crescent','family shalat ied','takbiran lantern parade','daging qurban gift bag','anak baju muslim baru','masjid golden dome','sembako hamper eid','ketupat idul adha','tumbuhan kurma dates','crescent moon star gold']},
+
+  {id:'indonesia_17agustus',i:'🇮🇩',t:'17 Agustus Indonesia',sub:'Indonesian Independence Day stickers',month:8,demand:'hi',
+   core:'Indonesian Independence Day kawaii character, 17 Agustus patriotic aesthetic, merah putih red white palette, Garuda Pancasila motif, pelajar bela negara chibi',
+   keywords:['17 Agustus','Indonesia Independence','merah putih','Garuda','Pancasila','kemerdekaan','HUT RI','perjuangan','bendera Indonesia'],
+   neg:'colonial imagery, ugly, deformed, text, watermark',
+   seoBase:'17 Agustus Indonesia Independence Day sticker kawaii merah putih patriotic',
+   vars:['bendera merah putih wave','Garuda Pancasila chibi','paskibraka character','lomba karung race','lomba makan kerupuk','tumpeng nasi kuning','anak pahlawan hero chibi','veteran salute','peta Indonesia outline','kue ulang tahun HUT RI','parade kemerdekaan','traditional games agustusan']},
+
+  {id:'imlek_cny',i:'🧧',t:'Imlek / Chinese New Year',sub:'Chinese New Year festive stickers',month:1,demand:'hi',
+   core:'Chinese New Year kawaii character, Imlek festive aesthetic, red gold angpao lantern, zodiac animal chibi, prosperity celebration',
+   keywords:['Imlek','Chinese New Year','angpao','lantern','lion dance','barongsai','shio','red envelope','gong xi','prosperity'],
+   neg:'ugly, deformed, negative symbols, text, watermark',
+   seoBase:'Imlek Chinese New Year sticker kawaii angpao lantern barongsai prosperity',
+   vars:['angpao red envelope','barongsai lion dance','zodiac shio animal','red lantern pair','peach blossom tree','gold ingot yuan bao','firework burst','dumpling jiaozi','fortune cat maneki','mandarin orange','spring scroll couplet','family reunion dinner']},
+
+  {id:'graduation',i:'🎓',t:'Graduation / Wisuda',sub:'Academic graduation celebration stickers',month:5,demand:'md',
+   core:'graduation kawaii chibi character, academic celebration aesthetic, toga mortarboard cap diploma scroll, confetti celebration, proud achievement mood',
+   keywords:['graduation sticker','wisuda','toga','diploma','academic','commencement','scholar','cap gown','achievement'],
+   neg:'sad, failing, ugly, deformed, text, watermark',
+   seoBase:'graduation wisuda sticker kawaii toga diploma academic celebration',
+   vars:['toga cap throw','diploma scroll','confetti burst','proud graduate','family hug grad','cum laude medal','photo with parents','classmates group','future bright','book tower grad','university gate','graduation cake']},
+
+  {id:'back_to_school',i:'🎒',t:'Back to School',sub:'New school year preparation stickers',month:7,demand:'hi',
+   core:'back to school kawaii character, school supply aesthetic, colorful stationery pencil ruler backpack notebook chibi, excited first day mood',
+   keywords:['back to school','school sticker','pencil case','backpack','notebook','stationery','first day','student kawaii','school supply'],
+   neg:'boring, ugly, deformed, text, watermark',
+   seoBase:'back to school sticker kawaii student backpack stationery preparation',
+   vars:['backpack ready','pencil case open','new notebook','ruler character','scissors craft','apple teacher','first day excited','lunch box kawaii','school bus wave','crayon set','eraser friend','timetable planner']},
+
+  {id:'earth_day',i:'🌍',t:'Earth Day',sub:'Environmental awareness April 22 stickers',month:4,demand:'hi',
+   core:'Earth Day kawaii character, environmental awareness aesthetic, green planet hug, tree planting nature conservation, eco-friendly motifs',
+   keywords:['Earth Day','environment','eco kawaii','planet hug','go green','recycle','tree planting','nature conservation','climate'],
+   neg:'pollution imagery, ugly, deformed, text, watermark',
+   seoBase:'Earth Day sticker kawaii eco green planet environment conservation',
+   vars:['planet Earth hug','tree planting chibi','recycling symbol','solar energy','ocean clean','leaf crown character','go green badge','butterfly nature','water drop save','eco bag carry','flower earth','green energy']},
+
+  {id:'diwali',i:'🪔',t:'Diwali Festival',sub:'Hindu festival of lights stickers',month:10,demand:'hi',
+   core:'Diwali festival kawaii character, festival of lights aesthetic, diya lamp rangoli mandala, vibrant orange gold palette, celebration dance',
+   keywords:['Diwali sticker','festival lights','diya lamp','rangoli','fireworks','Indian festival','deepavali','mandala','celebration'],
+   neg:'ugly, deformed, offensive, text, watermark',
+   seoBase:'Diwali festival lights sticker kawaii diya lamp rangoli Indian celebration',
+   vars:['diya oil lamp','rangoli pattern','firework burst','sugar sweet mithai','dancing character','lotus diya','peacock feather','elephant decorated','gold coin prosperity','sari outfit chibi','marigold garland','family lighting diya']},
+
+  {id:'thanksgiving',i:'🦃',t:'Thanksgiving',sub:'US Thanksgiving harvest celebration stickers',month:11,demand:'hi',
+   core:'Thanksgiving kawaii character, harvest celebration aesthetic, turkey chibi pumpkin pie autumn leaves, warm orange brown palette, gratitude family',
+   keywords:['Thanksgiving sticker','turkey kawaii','harvest','pumpkin pie','autumn leaves','gratitude','family dinner','cornucopia','pilgrim'],
+   neg:'ugly, deformed, colonial insensitive, text, watermark',
+   seoBase:'Thanksgiving sticker kawaii turkey harvest pumpkin pie autumn celebration',
+   vars:['turkey chibi wave','pumpkin pie slice','cornucopia harvest','autumn leaf pile','family dinner table','apple cider cup','grateful heart','scarecrow cute','harvest basket','maple leaf fall','thankful banner','cozy sweater season']},
+
+  {id:'holi_festival',i:'🌈',t:'Holi Festival',sub:'Indian spring color festival stickers',month:3,demand:'md',
+   core:'Holi festival kawaii character, spring color celebration aesthetic, powder color burst vibrant spectrum, joyful dancing celebration India',
+   keywords:['Holi sticker','color festival','powder color','Indian spring','rang celebration','festival colors','vibrant burst','joy dance'],
+   neg:'ugly, deformed, text, watermark',
+   seoBase:'Holi festival color sticker kawaii Indian spring celebration powder burst',
+   vars:['color powder throw','rainbow burst','dancing chibi','water balloon','floral spring','colorful hands','festival crowd','drum dhol celebration','gulal powder heart','spring flowers bloom','water gun play','bright sari outfit']},
+
+  {id:'womens_day',i:'👩',t:"Women's Day",sub:'International Women\'s Day March 8 stickers',month:3,demand:'md',
+   core:'International Women\'s Day kawaii character, empowerment aesthetic, strong confident woman chibi, floral feminism, purple palette celebration',
+   keywords:["Women's Day",'IWD','empowerment','feminist kawaii','strong woman','girl power','March 8','equality','floral feminist'],
+   neg:'ugly, deformed, negative stereotypes, text, watermark',
+   seoBase:"Women's Day sticker kawaii empowerment girl power feminist March 8",
+   vars:['fist raise empowerment','flower crown woman','career professional chibi','equal rights badge','purple floral frame','scientist woman','leader woman chibi','community women circle','you go girl banner','heart hands feminist','diverse women group','butterfly freedom']},
+
+  {id:'new_years',i:'🎆',t:"New Year's",sub:"New Year's Eve & Day celebration stickers",month:1,demand:'hi',
+   core:"New Year's celebration kawaii character, countdown midnight fireworks aesthetic, clock 12 o'clock champagne balloon confetti, festive gold silver palette",
+   keywords:["New Year's",'New Year Eve','fireworks kawaii','countdown','midnight celebration','champagne pop','confetti burst','resolution','Jan 1'],
+   neg:'ugly, deformed, alcohol abuse imagery, text, watermark',
+   seoBase:"New Year's sticker kawaii fireworks celebration countdown midnight confetti",
+   vars:['firework burst midnight','countdown clock 12','confetti cannon pop','party hat celebration','resolution journal','champagne glass toast','gold silver balloon','city skyline fireworks','snowflake new year','cheers celebration','happy new year banner','fresh start sunrise']},
+
+  {id:'valentine',i:'💝',t:"Valentine's Day",sub:'February 14 love romance stickers',month:2,demand:'hi',
+   core:"Valentine's Day kawaii character, love romance aesthetic, heart candy chocolate rose bouquet, red pink palette, couples celebration",
+   keywords:["Valentine's Day",'love sticker','romance kawaii','heart','chocolate','rose bouquet','cupid','February 14','sweetheart'],
+   neg:'suggestive adult, ugly, deformed, text, watermark',
+   seoBase:"Valentine's Day sticker kawaii love romance heart chocolate rose",
+   vars:['heart balloon bouquet','chocolate box gift','rose flower single','cupid arrow chibi','love letter envelope','couple heart lock','candy hearts XOXO','teddy bear hug','Ferrero Rocher gift','heart confetti burst','be mine banner','love potion bottle']},
+];
+
+// ══════════════════════════════════════════════════
+// PLATFORM CONFIG
+// ══════════════════════════════════════════════════
+const PLATFORMS={
+  etsy:{name:'Etsy',seoFields:['title','tags','description'],maxTags:13,tagSep:',',
+    sizeNote:'300 DPI minimum, 3000px+ recommended',formatNote:'PNG transparent or JPG white bg'},
+  redbubble:{name:'Redbubble',seoFields:['title','tags','description'],maxTags:15,tagSep:',',
+    sizeNote:'7632×6480px at 72 DPI or 2000px+ at 300 DPI',formatNote:'PNG with transparent background'},
+  line:{name:'LINE Creator',seoFields:['title','description'],sizeNote:'370×320px per sticker, max 1MB',
+    formatNote:'PNG with transparent background, max 40 stickers per set'},
+  whatsapp:{name:'WhatsApp',seoFields:['title'],sizeNote:'512×512px exactly',
+    formatNote:'WebP format, <100KB recommended'},
+  shopee:{name:'Shopee Digital',seoFields:['title','tags','description'],maxTags:20,tagSep:',',
+    sizeNote:'800×800px minimum, 1:1 ratio',formatNote:'PNG or JPG, <5MB'},
+  dtf:{name:'DTF Print',seoFields:['title'],sizeNote:'300 DPI, 8000px for large prints',
+    formatNote:'PNG with transparent background for DTF transfer'},
+};
+
+// ══════════════════════════════════════════════════
+// QUICKSTART COMBOS
+// ══════════════════════════════════════════════════
+const QUICKSTART=[
+  {i:'🔥',n:'Trending Kawaii',cat:'dark_kawaii',engine:'mj',platform:'etsy',finish:'glossy',cut:'die_cut',outline:'ultra_black',
+   tags:['Etsy','MJ','die-cut']},
+  {i:'🌙',n:'Idul Adha Pack',cat:'idul_adha',engine:'mj',platform:'etsy',finish:'holographic',cut:'die_cut',outline:'ultra_black',
+   tags:['Etsy','MJ','holo']},
+  {i:'🎀',n:'Sanrio Style',cat:'sanrio_style',engine:'gem',platform:'shopee',finish:'glossy',cut:'die_cut',outline:'white_halo',
+   tags:['Shopee','Gemini','safe']},
+  {i:'🦕',n:'Kids Dino Set',cat:'kids_dino_animals',engine:'nb2',platform:'etsy',finish:'glossy',cut:'die_cut',outline:'ultra_black',
+   tags:['Etsy','NB2 ID','kids']},
+  {i:'🇮🇩',n:'17 Agustus',cat:'indonesia_17agustus',engine:'mj',platform:'shopee',finish:'glossy',cut:'die_cut',outline:'ultra_black',
+   tags:['Shopee','MJ','nasional']},
+  {i:'💬',n:'LINE Sticker',cat:'line_expression',engine:'mj',platform:'line',finish:'clear',cut:'square',outline:'white_halo',
+   tags:['LINE','MJ','expression']},
+  {i:'📓',n:'Digital Planner',cat:'planner_bujo',engine:'en2',platform:'etsy',finish:'matte',cut:'square',outline:'no_outline',
+   tags:['Etsy','EN','GoodNotes']},
+  {i:'🐑',n:'Qurban Sheet',cat:'idul_adha',engine:'mj',platform:'etsy',finish:'holographic',cut:'die_cut',outline:'ultra_black',
+   tags:['Sheet 6×4','MJ','24 icons']},
+];
+
+// ══════════════════════════════════════════════════
+// MODIFIERS
+// ══════════════════════════════════════════════════
+const MODS_LIST=[
+  '✨ sparkle','🌈 rainbow','🌙 moonlit','⭐ star burst','💫 dreamy','🔮 magical',
+  '🌺 floral accent','🍄 mushroom','🦋 butterfly','🌊 wavy','🔥 fire','❄️ icy',
+  '🎀 ribbon bow','💎 crystal','🌿 botanical','☁️ cloud','🌸 cherry blossom',
+  '🦄 pastel palette','🍭 candy color','🌑 dark muted','🤍 soft white','💛 warm golden',
+];
+
+// ══════════════════════════════════════════════════
+// QUICK TEMPLATES
+// ══════════════════════════════════════════════════
+const TEMPLATES=[
+  {i:'🖤',t:'Pastel Goth Pack',cat:'dark_kawaii',cut:'die_cut',finish:'matte',outline:'white_halo'},
+  {i:'🍰',t:'Kawaii Food Set',cat:'food_cute',cut:'die_cut',finish:'glossy',outline:'ultra_black'},
+  {i:'🐸',t:'Cottagecore Kit',cat:'cottagecore_frog',cut:'kiss_cut',finish:'matte',outline:'no_outline'},
+  {i:'🌙',t:'Ramadan Pack',cat:'ramadan_eid',cut:'die_cut',finish:'holographic',outline:'ultra_black'},
+  {i:'💬',t:'LINE Expression',cat:'line_expression',cut:'square',finish:'clear',outline:'white_halo'},
+  {i:'📱',t:'WhatsApp Set',cat:'line_expression',cut:'circle',finish:'glossy',outline:'ultra_black'},
+  {i:'🎃',t:'Halloween Pack',cat:'halloween_spooky',cut:'die_cut',finish:'glossy',outline:'neon_glow'},
+  {i:'🎄',t:'Christmas Bundle',cat:'christmas_holiday',cut:'die_cut',finish:'holographic',outline:'white_halo'},
+  {i:'🚀',t:'Space Adventure',cat:'space_galaxy',cut:'die_cut',finish:'holographic',outline:'neon_glow'},
+  {i:'🧚',t:'Fairy Forest Set',cat:'fairy_forest',cut:'die_cut',finish:'clear',outline:'no_outline'},
+  {i:'♋',t:'Zodiac Pack',cat:'zodiac_astrology',cut:'circle',finish:'matte',outline:'ultra_black'},
+  {i:'💑',t:'Couple Matching',cat:'chibi_couple',cut:'die_cut',finish:'glossy',outline:'white_halo'},
+  {i:'🏥',t:'Nurse Essentials',cat:'nurse_medical',cut:'die_cut',finish:'glossy',outline:'ultra_black'},
+  {i:'📚',t:'Teacher Toolkit',cat:'teacher_school',cut:'die_cut',finish:'matte',outline:'ultra_black'},
+  {i:'🎮',t:'Gamer Pack',cat:'gaming_retro',cut:'die_cut',finish:'holographic',outline:'neon_glow'},
+  {i:'☕',t:'Coffee Lover Set',cat:'coffee_morning',cut:'die_cut',finish:'matte',outline:'white_halo'},
+  {i:'🌿',t:'Dark Botanical',cat:'vintage_botanical_dark',cut:'kiss_cut',finish:'matte',outline:'no_outline'},
+  {i:'⚡',t:'Cyberpunk Neon',cat:'neon_cyberpunk',cut:'die_cut',finish:'holographic',outline:'neon_glow'},
+  {i:'📓',t:'Planner Set',cat:'planner_bujo',cut:'square',finish:'matte',outline:'no_outline'},
+  {i:'🎸',t:'Music Lover Pack',cat:'music_band',cut:'die_cut',finish:'glossy',outline:'ultra_black'},
+  {i:'🧘',t:'Wellness Kit',cat:'yoga_wellness',cut:'circle',finish:'matte',outline:'no_outline'},
+  {i:'🏳️‍🌈',t:'Pride Bundle',cat:'pride_rainbow',cut:'die_cut',finish:'holographic',outline:'white_halo'},
+  {i:'🎂',t:'Birthday Pack',cat:'birthday_party',cut:'die_cut',finish:'holographic',outline:'ultra_black'},
+  {i:'🐱',t:'Cat Universe',cat:'cat_universe',cut:'die_cut',finish:'glossy',outline:'ultra_black'},
+  // Licensed character styles
+  {i:'🎮',t:'Pocket Creatures',cat:'pokemon_style',cut:'die_cut',finish:'glossy',outline:'ultra_black'},
+  {i:'🎀',t:'Sanrio Pack',cat:'sanrio_style',cut:'die_cut',finish:'holographic',outline:'white_halo'},
+  // Kids 4-7 themes
+  {i:'🦕',t:'Kids Dino Pack',cat:'kids_dino_animals',cut:'die_cut',finish:'glossy',outline:'ultra_black'},
+  {i:'👸',t:'Princess Magic',cat:'kids_princess_unicorn',cut:'die_cut',finish:'holographic',outline:'white_halo'},
+  {i:'🚗',t:'Kids Heroes',cat:'kids_vehicles_hero',cut:'die_cut',finish:'glossy',outline:'ultra_black'},
+  {i:'🌈',t:'Rainbow Learn',cat:'kids_rainbow_edu',cut:'square',finish:'matte',outline:'ultra_black'},
+  // Moment templates
+  {i:'🐑',t:'Idul Adha Pack',cat:'idul_adha',cut:'die_cut',finish:'holographic',outline:'ultra_black'},
+  {i:'🇮🇩',t:'17 Agustus Pack',cat:'indonesia_17agustus',cut:'die_cut',finish:'glossy',outline:'ultra_black'},
+  {i:'🧧',t:'Imlek Bundle',cat:'imlek_cny',cut:'die_cut',finish:'holographic',outline:'white_halo'},
+  {i:'🎓',t:'Graduation Set',cat:'graduation',cut:'die_cut',finish:'glossy',outline:'ultra_black'},
+  {i:'🎒',t:'Back to School',cat:'back_to_school',cut:'die_cut',finish:'glossy',outline:'ultra_black'},
+  {i:'🌍',t:'Earth Day Kit',cat:'earth_day',cut:'kiss_cut',finish:'matte',outline:'no_outline'},
+  {i:'🪔',t:'Diwali Pack',cat:'diwali',cut:'die_cut',finish:'holographic',outline:'neon_glow'},
+  {i:'🦃',t:'Thanksgiving Set',cat:'thanksgiving',cut:'die_cut',finish:'matte',outline:'ultra_black'},
+  {i:'🌈',t:'Holi Festival',cat:'holi_festival',cut:'die_cut',finish:'glossy',outline:'ultra_black'},
+  {i:'💝',t:"Valentine's Pack",cat:'valentine',cut:'die_cut',finish:'holographic',outline:'white_halo'},
+  {i:'🎆',t:"New Year's Pack",cat:'new_years',cut:'die_cut',finish:'holographic',outline:'neon_glow'},
+];
+
+// ══════════════════════════════════════════════════
+// VARIATION SEEDS
+// ══════════════════════════════════════════════════
+const VAR_SEEDS={
+  expressions:[
+    // 30 unique expressions
+    'happy grinning wide smile','sad crying teardrops','surprised shocked mouth open',
+    'angry fuming red face','sleepy drowsy half eyes','love struck heart eyes',
+    'embarrassed blushing red cheeks','nervous sweating drop','confident smiling proud',
+    'confused tilting head question mark','excited jumping energy','shy hiding behind hands',
+    'playful winking tongue out','cool wearing sunglasses','hungry drooling food thoughts',
+    'scared trembling freeze','laughing rolling floor','determined clenched fists',
+    'tired yawning stretched','bored sighing eyes closed','curious eyes wide sparkling',
+    'silly making funny face','peaceful eyes closed zen','epic dramatic wind blowing',
+    'sneaky smirking side eye','cheerful bouncing spring','melancholic rain window',
+    'disgusted yuck face','inspired lightbulb moment','proud chest puffed out',
+  ],
+  characters:[
+    // 30 unique character archetypes
+    'main character center stage','sidekick friend loyal','villain dramatic evil grin',
+    'baby version tiny cute','elderly version wise wrinkles','teen version cool casual',
+    'royalty version crown cape','casual everyday relaxed','fancy dressed formal bow',
+    'sporty athletic energetic','ninja stealth dark outfit','pirate adventure eye patch',
+    'wizard magical staff hat','chef cooking apron hat','artist painting palette brush',
+    'musician playing instrument','doctor healing stethoscope','explorer adventuring map',
+    'superhero flying cape','fairy woodland wings wand','vampire gothic cape fangs',
+    'zombie cute undead','robot mechanical circuits','angel halo white wings',
+    'devil cute horns tail','detective mystery magnifier','cowboy western hat lasso',
+    'samurai warrior katana','mermaid ocean tail fins','astronaut space helmet suit',
+  ],
+  accessories:[
+    // 30 unique accessories
+    'wearing sunglasses cool','holding flower bouquet','with umbrella rainy',
+    'holding coffee cup warm','wearing headphones music','with backpack adventure',
+    'holding book reading','with camera photography','wearing crown royal',
+    'holding balloon festive','holding ice cream cone','with teddy bear hug',
+    'wearing cozy scarf knit','holding lollipop candy','with guitar strumming',
+    'holding pizza slice','wearing chef apron','with paintbrush art',
+    'holding trophy champion','wearing superhero cape','with magic wand sparkle',
+    'holding vintage telephone','wearing straw hat sun','with butterfly net catch',
+    'holding sparkler firework','wearing cute suspenders','with potted plant gift',
+    'holding treasure map','wearing colorful overalls','with fishing rod pond',
+  ],
+  seasonal:[
+    // 30 seasonal / time variations
+    'spring cherry blossom pink','summer beach sunny waves','autumn harvest orange leaves',
+    'winter snowfall white cozy','rainy season umbrella drops','golden hour sunset warm',
+    'midnight starry moonlit','sunrise morning fresh dew','twilight dusk purple sky',
+    'storm dramatic dark clouds','Valentine pink hearts roses','Easter pastel eggs spring',
+    'Halloween spooky pumpkin night','Christmas holiday snow pine','New Year fireworks countdown',
+    'Ramadan lantern crescent gold','tropical summer palm breeze','mountain winter pine frost',
+    'desert heat mirage sun','arctic freeze ice crystal','monsoon heavy rain puddle',
+    'autumn maple red gold','spring garden blooming tulip','summer festival fireflies',
+    'winter cozy fireplace mug','harvest moon orange glow','cherry blossom sakura shower',
+    'summer solstice long day','Idul Adha festive green gold','birthday party confetti color',
+  ],
+  sheet:[
+    // 30 sheet layout positions / arrangement descriptions
+    'top-left corner position','top-center position','top-right corner position',
+    'middle-left position','center focal piece','middle-right position',
+    'bottom-left corner position','bottom-center position','bottom-right corner position',
+    'scattered random layout','diagonal stripe pattern','circular ring arrangement',
+    'grid 3x3 center cluster','border frame decoration','zigzag row pattern',
+    'large hero + 4 small','2 column split layout','3 row horizontal bands',
+    'heart shaped arrangement','star shaped cluster','diamond pattern grid',
+    'L-shaped corner fill','top row + bottom cluster','left column + right grid',
+    'center radial burst','four quadrant equal split','progressive size large to small',
+    'alternating big small row','nested inner outer ring','full bleed edge to edge fill',
+  ],
+};
+
+// ══════════════════════════════════════════════════
+// STICKER TECH LABELS
+// ══════════════════════════════════════════════════
+const TECH_LABELS={
+  cut:{die_cut:'die-cut',kiss_cut:'kiss-cut',square:'square cut',circle:'circle cut',washi:'washi tape strip'},
+  finish:{glossy:'glossy finish',matte:'matte finish',holographic:'holographic foil',clear:'clear/transparent',glitter:'glitter finish'},
+  size:{
+    '2in':'2 inch (50mm)',
+    '3in':'3 inch (75mm)',
+    '4in':'4 inch (100mm)',
+    line370:'LINE 370×320px',
+    wa512:'WhatsApp 512×512px',
+    print8k:'8000px print-ready',
+  },
+  outline:{ultra_black:'ultra-thick black outline (3-4px)',white_halo:'white halo border',scalloped:'scalloped wave border',
+    double:'double outline stroke',neon_glow:'neon glow border effect',no_outline:'no outline transparent edge'},
+};
+
+// ══════════════════════════════════════════════════
+// MAIN STATE
+// ══════════════════════════════════════════════════
+const S={
+  platform:'etsy',
+  engine:'mj',
+  cat:'dark_kawaii',
+  cutType:'die_cut',
+  finish:'glossy',
+  sizePreset:'4in',
+  outlineStyle:'ultra_black',
+  varMode:'standard',
+  mods:new Set(),
+  lastPrompts:{},
+  history:[],
+  tab:'prompt',
+  varCount:0,
+  catQuery:'',
+  activeMonth:'all',
+  stickerFormat:'single',
+  gridLayout:'custom',
+  iconCount:24,
+  commercialMode:false,
+  expertMode:false,
+
+  init(){
+    this.setMode('simple'); // default Simple mode
+    this.renderQuickstart();
+    this.renderCats();
+    this.renderMods();
+    this.renderTemplates();
+    this.loadHistory();
+    this.updateStats();
+  },
+
+  setPlatform(p){
+    this.platform=p;
+    document.querySelectorAll('.plat-btn').forEach(b=>b.classList.toggle('active',b.dataset.plat===p));
+    this.updateStats();
+  },
+
+  setEngine(e){
+    this.engine=e;
+    document.querySelectorAll('.eng-btn').forEach(b=>b.classList.toggle('active',b.dataset.eng===e));
+    this.updateStats();
+  },
+
+  setCat(id){
+    this.cat=id;
+    const c=CATS.find(x=>x.id===id);
+    if(!c)return;
+    document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',b.dataset.cat===id));
+    document.getElementById('catBigIcon').textContent=c.i;
+    document.getElementById('catNameDisplay').textContent=c.t;
+    document.getElementById('catSubDisplay').textContent=c.sub;
+    this.updateStats();
+  },
+
+  setCut(v){this.cutType=v;this.updateStats()},
+  setFinish(v){this.finish=v;this.updateStats()},
+  setSize(v){this.sizePreset=v;this.updateStats()},
+  setOutline(v){this.outlineStyle=v;this.updateStats()},
+
+  setMode(m){
+    this.expertMode=(m==='expert');
+    document.body.classList.toggle('simple-mode',!this.expertMode);
+    document.getElementById('simpleModeBtn')?.classList.toggle('active',!this.expertMode);
+    document.getElementById('expertModeBtn')?.classList.toggle('active',this.expertMode);
+    // toggle simple vs expert engine display
+    const es=document.getElementById('engineSimple');
+    const ee=document.getElementById('engineExpert');
+    if(es) es.style.display=this.expertMode?'none':'grid';
+    if(ee) ee.style.display=this.expertMode?'flex':'none';
+    this.toast(this.expertMode?'🔧 Expert Mode — semua opsi aktif':'⚡ Simple Mode — tampilan ringkas',2000);
+  },
+
+  renderQuickstart(){
+    const g=document.getElementById('qsGrid');
+    if(!g)return;
+    g.innerHTML=QUICKSTART.map((q,i)=>`
+      <button class="qs-btn" onclick="S.applyQuickstart(${i})">
+        <div class="qs-btn-top">
+          <span class="qs-ic">${q.i}</span>
+          <span class="qs-name">${q.n}</span>
+        </div>
+        <div class="qs-badges">
+          ${q.tags.map(t=>`<span class="qs-badge">${t}</span>`).join('')}
+        </div>
+      </button>
+    `).join('');
+  },
+
+  applyQuickstart(idx){
+    const q=QUICKSTART[idx];
+    if(!q)return;
+    this.setCat(q.cat);
+    this.setEngine(q.engine);
+    this.setPlatform(q.platform);
+    this.cutType=q.cut||'die_cut';
+    this.finish=q.finish||'glossy';
+    this.outlineStyle=q.outline||'ultra_black';
+    // Qurban Sheet quickstart → enable sheet 6x4
+    if(idx===7){this.setFormat('sheet');this.setGrid('6x4',24);}
+    else this.setFormat('single');
+    // sync dropdowns
+    ['selCut','selFinish','selOutline'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.value=id==='selCut'?this.cutType:id==='selFinish'?this.finish:this.outlineStyle;
+    });
+    this.updateStats();
+    this.generate();
+    this.toast(`✅ ${q.n} — prompt generated!`,2500);
+  },
+
+  toggleCommercial(v){
+    this.commercialMode=!!v;
+    // show warning banner if switching to reference mode on licensed category
+    const cat=CATS.find(x=>x.id===this.cat);
+    if(!v && cat&&cat.licensed){
+      this.showToast('⚠️ Reference Mode — NOT for commercial sale!',4000,'#ff6b6b');
+    } else if(v){
+      this.showToast('✅ Commercial Safe Mode ON',2000);
+    }
+    this.updateStats();
+  },
+
+  // get core description (commercial-safe or full reference)
+  getCoreStr(cat){
+    const c=cat||CATS.find(x=>x.id===this.cat);
+    if(c.licensed && this.commercialMode && c.coreCommercial) return c.coreCommercial;
+    return c.core;
+  },
+
+  setFormat(f){
+    this.stickerFormat=f;
+    document.querySelectorAll('.fmt-btn').forEach(b=>b.classList.toggle('active',b.dataset.fmt===f));
+    const panel=document.getElementById('sheetPanel');
+    if(panel) panel.classList.toggle('visible',f==='sheet');
+    this.updateStats();
+  },
+
+  setGrid(g,count){
+    this.gridLayout=g;
+    if(count>0)this.setCount(count);
+    document.querySelectorAll('.grid-btn').forEach(b=>b.classList.toggle('active',b.dataset.grid===g));
+  },
+
+  setCount(n){
+    this.iconCount=n;
+    document.querySelectorAll('.cnt-btn').forEach(b=>b.classList.toggle('active',+b.dataset.cnt===n));
+  },
+
+  setVarMode(v){
+    this.varMode=v;
+    document.querySelectorAll('.var-btn').forEach(b=>b.classList.toggle('active',b.dataset.var===v));
+  },
+
+  toggleMod(m){
+    if(this.mods.has(m))this.mods.delete(m);
+    else this.mods.add(m);
+    document.querySelectorAll('.mod-chip').forEach(c=>{
+      c.classList.toggle('active',this.mods.has(c.dataset.mod));
+    });
+  },
+
+  filterCats(q){
+    this.catQuery=q.toLowerCase();
+    this.renderCats();
+  },
+
+  filterByMonth(m){
+    this.activeMonth=m;
+    document.querySelectorAll('.month-btn').forEach(b=>b.classList.toggle('active',b.dataset.month===m));
+    this.renderCats();
+  },
+
+  setTab(t){
+    this.tab=t;
+    document.querySelectorAll('.out-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
+    if(t==='history')this.renderHistory();
+    else if(t==='tips')this.renderTips();
+    else if(t==='seo')this.renderSEO();
+    else if(t==='variations')this.renderVariationsPanel();
+  },
+
+  updateStats(){
+    const scPlat=document.getElementById('scPlat');
+    const scEng=document.getElementById('scEng');
+    const scCat=document.getElementById('scCat');
+    const scCut=document.getElementById('scCut');
+    const scFinish=document.getElementById('scFinish');
+    const scVars=document.getElementById('scVars');
+    if(scPlat)scPlat.textContent=PLATFORMS[this.platform]?.name||this.platform;
+    if(scEng)scEng.textContent=this.engine.toUpperCase();
+    if(scCat)scCat.textContent=this.cat;
+    if(scCut)scCut.textContent=TECH_LABELS.cut[this.cutType]||this.cutType;
+    if(scFinish)scFinish.textContent=TECH_LABELS.finish[this.finish]||this.finish;
+    const scFormat=document.getElementById('scFormat');
+    if(scFormat)scFormat.textContent=this.stickerFormat==='sheet'
+      ?`Sheet ${this.gridLayout!=='custom'?this.gridLayout:''} ${this.iconCount}icons`:'Single';
+    if(scVars)scVars.textContent=this.varCount;
+  },
+
+  getStickerTechBlock(){
+    const c=TECH_LABELS.cut[this.cutType];
+    const f=TECH_LABELS.finish[this.finish];
+    const sz=TECH_LABELS.size[this.sizePreset];
+    const o=TECH_LABELS.outline[this.outlineStyle];
+    const isSheet=this.stickerFormat==='sheet';
+    const grid=isSheet&&this.gridLayout!=='custom'?this.gridLayout:null;
+    const cnt=isSheet?this.iconCount:1;
+    return{cut:c,finish:f,size:sz,outline:o,isSheet,grid,iconCount:cnt};
+  },
+
+  getModsStr(){
+    return [...this.mods].map(m=>m.replace(/^[^ ]+ /,'')).join(', ');
+  },
+
+  // ── BUILDERS ──────────────────────────────────────
+  buildMJ(cat,extra=''){
+    const c=cat||CATS.find(x=>x.id===this.cat);
+    const core=this.getCoreStr(c);
+    const tb=this.getStickerTechBlock();
+    const mods=this.getModsStr();
+    const modStr=mods?`, ${mods}`:'';
+    const safeTag=c.licensed&&this.commercialMode?' [COMMERCIAL SAFE]':c.licensed?' [REFERENCE ONLY - not for sale]':'';
+    const ar=this.sizePreset==='line370'?'--ar 37:32':tb.isSheet?'--ar 4:3':'--ar 1:1';
+    const sheetStr=tb.isSheet
+      ?`, sticker sheet${tb.grid?' '+tb.grid+' grid':''}${tb.iconCount>1?', '+tb.iconCount+' icons':''}, uniform size, evenly spaced, kiss-cut sheet`
+      :'';
+    return `${c.t.toLowerCase()} ${tb.isSheet?'sticker sheet':'sticker'}, ${core}${modStr}, ${tb.outline}, isolated on transparent background, ${tb.finish}, ${tb.size}, ${tb.cut}${sheetStr}${extra?', '+extra:''}${safeTag}
+
+--ar ${ar.replace('--ar ','')} --v 7 --niji 6 --stylize 850 --q 2 --style raw --no text, watermark, border, background`;
+  },
+
+  buildNB2(cat,extra=''){
+    const c=cat||CATS.find(x=>x.id===this.cat);
+    const core=this.getCoreStr(c);
+    const tb=this.getStickerTechBlock();
+    const mods=this.getModsStr();
+    const plat=PLATFORMS[this.platform];
+    const safeNote=c.licensed?(this.commercialMode?'✅ COMMERCIAL SAFE VERSION':'⚠️ REFERENCE ONLY — TIDAK untuk dijual'):'';
+    const formatLine=tb.isSheet
+      ?`Sheet Pack — Grid ${tb.grid||'custom'}${tb.iconCount>1?', '+tb.iconCount+' icons':''}`
+      :'Single Icon';
+    return `━━ STICKER PROMPT — ${c.t.toUpperCase()} ━━${safeNote?' ['+safeNote+']':''}
+
+📌 KATEGORI    : ${c.t}
+🎨 STYLE       : ${c.sub}
+🖼️ FORMAT      : ${formatLine}
+📐 UKURAN      : ${tb.size}, ${tb.cut}
+✨ FINISH      : ${tb.finish}
+🖊️ OUTLINE     : ${tb.outline}
+📦 PLATFORM    : ${plat.name}
+${extra?'🔄 VARIASI     : '+extra+'\n':''}
+━━ DESKRIPSI VISUAL ━━
+
+${core}${mods?'\nModifier: '+mods:''}.
+${tb.isSheet?`Buat ${tb.iconCount} ikon berbeda dalam satu sheet grid ${tb.grid||''}.\nSetiap ikon berdiri sendiri, ukuran seragam, spasi merata.`:'Karakter tunggal terisolasi di latar transparan.'}
+Warna: ${c.keywords.slice(0,4).join(', ')}.
+Gaya: chibi, illustrasi digital, detail medium.
+
+━━ KATA KUNCI ━━
+
+${c.keywords.join(' | ')}
+
+━━ NEGATIVE PROMPT ━━
+
+${c.neg}
+
+━━ SPESIFIKASI TEKNIS ━━
+
+Ukuran: ${tb.size}
+Format: PNG transparan, 300 DPI
+${tb.isSheet?'Layout: Sheet '+tb.grid+' | '+tb.iconCount+' icons | kiss-cut':'Jenis: Single die-cut'}
+Finishing: ${tb.finish}`;
+  },
+
+  buildSD(cat,extra=''){
+    const c=cat||CATS.find(x=>x.id===this.cat);
+    const core=this.getCoreStr(c);
+    const tb=this.getStickerTechBlock();
+    const mods=this.getModsStr();
+    const safeTag=c.licensed?(this.commercialMode?', commercial safe version':''):', (reference only - not for sale)';
+    const sheetStr=tb.isSheet?`, sticker sheet ${tb.grid||''} grid, ${tb.iconCount} icons uniform, kiss-cut sheet layout`:'';
+    const canvasSize=tb.isSheet
+      ?(tb.grid==='8x4'?'2048x1024':tb.grid==='6x4'?'1536x1024':tb.grid==='6x6'?'1536x1536':'1024x1024')
+      :(this.sizePreset==='line370'?'370x320':this.sizePreset==='wa512'?'512x512':'1024x1024');
+    return `POSITIVE:
+${core}${mods?', '+mods:''}, ${tb.outline}, transparent background, ${tb.isSheet?'sticker sheet design, multiple icons, evenly spaced':'isolated artwork, sticker design'}, ${tb.finish}, digital illustration, clean lineart, flat color, high detail, ${tb.size}${sheetStr}${extra?', '+extra:''}${c.licensed?safeTag:''}
+
+NEGATIVE:
+${c.neg}, complex background, shadow, gradient background, low quality, blurry, extra limbs, mutation${tb.isSheet?'':', multiple characters'}
+
+Settings: Steps 30, CFG 7.5, Sampler DPM++ 2M Karras, Size ${canvasSize}`;
+  },
+
+  buildGemini(cat,extra=''){
+    const c=cat||CATS.find(x=>x.id===this.cat);
+    const core=this.getCoreStr(c);
+    const tb=this.getStickerTechBlock();
+    const mods=this.getModsStr();
+    const safeNote=c.licensed?(this.commercialMode?'\n⚖️ COMMERCIAL SAFE VERSION — style-inspired, no brand names.':'\n⚠️ REFERENCE VERSION — do NOT use for commercial sale.'):'';
+    const sheetInstr=tb.isSheet?`
+This is a STICKER SHEET design:
+• Grid layout: ${tb.grid||'custom'} arrangement
+• Total icons: ${tb.iconCount} unique icons
+• Each icon must be the same size and evenly spaced
+• All icons share the same art style and color palette
+• Arrange icons neatly across the sheet with equal padding`:'';
+    return `Create a high-quality ${tb.isSheet?'sticker sheet':'sticker illustration'} of ${c.t.toLowerCase()}.${safeNote}
+
+The design should feature: ${core}${mods?', with '+mods:''}. Use a kawaii digital illustration style with clean linework and vibrant colors.
+${sheetInstr}
+STICKER SPECIFICATIONS:
+• Format: ${tb.isSheet?'Sheet Pack — '+tb.grid+' grid, '+tb.iconCount+' icons':'Single Icon'}
+• Outline style: ${tb.outline}
+• Background: fully transparent (PNG)
+• Finish type: ${tb.finish}
+• Cut format: ${tb.isSheet?'kiss-cut sheet':tb.cut}
+• Canvas size: ${tb.size}
+• Platform: ${PLATFORMS[this.platform].name}
+${extra?'• Variation: '+extra:''}
+IMPORTANT RULES:
+1. ${tb.isSheet?'All '+tb.iconCount+' icons must be fully isolated on transparent background':'Character must be completely isolated with 100% transparent background'}
+2. No shadows, gradients, or background elements
+3. ${tb.outline} must cleanly follow every silhouette
+4. All fine details must remain crisp at sticker print size
+5. Do not include any text, watermarks, or brand logos
+
+Style references: ${c.keywords.slice(0,5).join(', ')}.
+Color palette: cheerful, saturated, print-optimized.`;
+  },
+
+  buildFlow(cat,extra=''){
+    const c=cat||CATS.find(x=>x.id===this.cat);
+    const core=this.getCoreStr(c);
+    const tb=this.getStickerTechBlock();
+    const mods=this.getModsStr();
+    const safeTag=c.licensed?(this.commercialMode?' [COMMERCIAL SAFE]':' [REFERENCE ONLY]'):'';
+    const sheetStr=tb.isSheet?`, sticker sheet ${tb.grid||''} grid layout, ${tb.iconCount} icons, uniform size, evenly spaced`:'';
+    const canvas=tb.isSheet
+      ?(tb.grid==='8x4'?'2048×1024':tb.grid==='6x4'?'1536×1024':tb.grid==='6x6'?'1536×1536':'1024×1024')
+      :(this.sizePreset==='line370'?'370×320':this.sizePreset==='wa512'?'512×512':'1024×1024');
+    return `POSITIVE PROMPT:${safeTag}
+${core}${mods?', '+mods:''}, ${tb.outline}, ${tb.isSheet?'sticker sheet, multiple icons, evenly arranged':'isolated sticker artwork'}, transparent background, ${tb.finish}, digital art, clean illustration, vibrant colors${sheetStr}${extra?', '+extra:''}
+
+NEGATIVE PROMPT:
+${c.neg}, background, shadow, low quality, blurry, extra fingers, deformed, ugly, bad anatomy, text, watermark
+
+Flow Settings:
+• Steps: 30
+• CFG Scale: 7.5
+• Sampler: DPM++ 2M Karras
+• Canvas: ${canvas}px
+• Format: ${tb.isSheet?'Sheet '+tb.grid+' | '+tb.iconCount+' icons | kiss-cut':'Single die-cut'}
+• Model: Anything V5 / DreamShaper / Counterfeit-V30`;
+  },
+
+  buildEN2(cat,extra=''){
+    const c=cat||CATS.find(x=>x.id===this.cat);
+    const core=this.getCoreStr(c);
+    const tb=this.getStickerTechBlock();
+    const mods=this.getModsStr();
+    const plat=PLATFORMS[this.platform];
+    const safeNote=c.licensed?(this.commercialMode?'✅ COMMERCIAL SAFE VERSION':'⚠️ REFERENCE ONLY — do NOT sell'):'';
+    const formatLine=tb.isSheet
+      ?`Sheet Pack — Grid ${tb.grid||'custom'}, ${tb.iconCount} icons, kiss-cut`
+      :'Single Icon';
+    return `════ STICKER PROMPT — ${c.t.toUpperCase()} ════${safeNote?' ['+safeNote+']':''}
+
+📌 CATEGORY    : ${c.t}
+🎨 STYLE       : ${c.sub}
+🖼️ FORMAT      : ${formatLine}
+📐 TECH        : ${tb.size}, ${tb.cut}, ${tb.outline}
+✨ FINISH      : ${tb.finish}
+📦 PLATFORM    : ${plat.name}
+${extra?'🔄 VARIATION   : '+extra:''}
+════ VISUAL DESCRIPTION ════
+
+${core}${mods?'\nStyle modifiers: '+mods:''}.
+${tb.isSheet?`Design a sheet of ${tb.iconCount} icons arranged in ${tb.grid||'custom'} grid.\nEach icon is independent, uniform size, evenly spaced.`:'Single character fully isolated on transparent background.'}
+Color palette: ${c.keywords.slice(0,4).join(', ')}.
+Illustration style: kawaii chibi, digital art, clean linework, medium detail.
+
+════ KEYWORDS ════
+
+${c.keywords.join(' | ')}
+
+════ NEGATIVE PROMPT ════
+
+${c.neg}
+
+════ PLATFORM SPECS ════
+
+Size: ${tb.size}
+Format: PNG transparent, 300 DPI minimum
+${tb.isSheet?'Layout: Sheet '+tb.grid+' | '+tb.iconCount+' icons | kiss-cut':'Cut type: '+tb.cut}
+Finishing: ${tb.finish}
+Platform upload: ${plat.sizeNote||'See platform guidelines'}`;
+  },
+
+  buildLeonardo(cat,extra=''){
+    const c=cat||CATS.find(x=>x.id===this.cat);
+    const core=this.getCoreStr(c);
+    const tb=this.getStickerTechBlock();
+    const mods=this.getModsStr();
+    const safeTag=c.licensed?(this.commercialMode?' [COMMERCIAL SAFE]':' [REFERENCE ONLY]'):'';
+    const sheetStr=tb.isSheet?`, sticker sheet ${tb.grid||''} grid, ${tb.iconCount} icons, uniform size`:'';
+    const canvas=tb.isSheet
+      ?(tb.grid==='8x4'?'2048×1024':tb.grid==='6x4'?'1536×1024':tb.grid==='6x6'?'1536×1536':'1024×1024')
+      :(this.sizePreset==='line370'?'370×320':this.sizePreset==='wa512'?'512×512':'1024×1024');
+    return `${core}${mods?', '+mods:''}, ${tb.outline}, ${tb.isSheet?'sticker sheet design, '+tb.iconCount+' icons on sheet, '+tb.grid+' grid layout':'sticker design, isolated artwork'}, transparent background, ${tb.finish}, clean digital illustration, chibi kawaii style${sheetStr}${extra?', '+extra:''}${safeTag}
+
+Recommended Model: Anime Pastel Dream / AlbedoBase XL / DreamShaper v7
+Canvas Size: ${canvas}px
+Format: ${tb.isSheet?'Sheet Pack — Grid '+tb.grid+' | '+tb.iconCount+' icons | kiss-cut':'Single icon | '+tb.cut}
+Negative: ${c.neg}
+
+Alchemy: On | PhotoReal: Off | Guidance: 7 | Steps: 30 | Contrast: High`;
+  },
+
+  buildPrompt(engine,cat,extra){
+    const e=engine||this.engine;
+    const c=cat||(CATS.find(x=>x.id===this.cat));
+    switch(e){
+      case 'mj':   return this.buildMJ(c,extra);
+      case 'nb2':  return this.buildNB2(c,extra);
+      case 'en2':  return this.buildEN2(c,extra);
+      case 'sd':   return this.buildSD(c,extra);
+      case 'gem':  return this.buildGemini(c,extra);
+      case 'flow': return this.buildFlow(c,extra);
+      case 'leo':  return this.buildLeonardo(c,extra);
+      default:     return this.buildMJ(c,extra);
+    }
+  },
+
+  // ── GENERATE ──────────────────────────────────────
+  generate(){
+    const cat=CATS.find(x=>x.id===this.cat);
+    if(!cat)return;
+    const prompt=this.buildPrompt();
+    this.lastPrompts[this.engine]=prompt;
+    this.addHistory(prompt,cat);
+    this.setTab('prompt');
+    this.renderSinglePrompt(prompt,cat);
+  },
+
+  generateVariations(){
+    const cat=CATS.find(x=>x.id===this.cat);
+    if(!cat)return;
+    const seeds=this.getVarSeeds(cat);
+    const vars=seeds.map((seed,i)=>({
+      num:i+1,
+      seed,
+      prompt:this.buildPrompt(this.engine,cat,seed),
+    }));
+    this.varCount=vars.length;
+    this.updateStats();
+    this.lastVariations=vars;
+    this.setTab('variations');
+    this.renderVariationsPanel();
+  },
+
+  getVarSeeds(cat){
+    const mode=this.varMode;
+    const TARGET=30;
+
+    if(mode==='expressions') return VAR_SEEDS.expressions.slice(0,TARGET);
+    if(mode==='characters')  return VAR_SEEDS.characters.slice(0,TARGET);
+    if(mode==='accessories') return VAR_SEEDS.accessories.slice(0,TARGET);
+    if(mode==='seasonal')    return VAR_SEEDS.seasonal.slice(0,TARGET);
+    if(mode==='sheet')       return VAR_SEEDS.sheet.slice(0,TARGET);
+
+    // ── standard mode: category vars + expanded generic fills up to 30 ──
+    const base=cat.vars||[];
+    const generic=[
+      'cute smiling waving','holding heart love','jumping joyful energy',
+      'sitting relaxed calm','running energetic fast','thinking curious pose',
+      'sleeping peacefully zzz','dancing happy moves','flying magical float',
+      'stretching morning yawn','peeking shy corner','giving thumbs up',
+      'doing peace sign v','blowing kiss heart','catching falling star',
+      'spinning twirl dizzy','hiding under hat','poking out surprise',
+    ];
+    const combined=[...base,...generic];
+    // if still under 30, pad by cycling base with modifiers
+    const modPad=['pastel version','dark ink version','glitter sparkle version',
+      'chibi tiny version','extra fluffy version'];
+    let padded=[...combined];
+    let mi=0;
+    while(padded.length<TARGET){
+      padded.push(`${base[mi%base.length]||generic[mi%generic.length]}, ${modPad[Math.floor(mi/base.length)%modPad.length]}`);
+      mi++;
+    }
+    return padded.slice(0,TARGET);
+  },
+
+  applyTemplate(tpl){
+    this.setCat(tpl.cat);
+    this.cutType=tpl.cut;
+    this.finish=tpl.finish;
+    this.outlineStyle=tpl.outline;
+    document.getElementById('selCut').value=tpl.cut;
+    document.getElementById('selFinish').value=tpl.finish;
+    document.getElementById('selOutline').value=tpl.outline;
+    this.updateStats();
+    this.generate();
+    this.toast('Template applied: '+tpl.t);
+  },
+
+  // ── RENDER ────────────────────────────────────────
+  renderCats(){
+    const g=document.getElementById('catGrid');
+    if(!g)return;
+    const q=(this.catQuery||'').toLowerCase();
+    const m=this.activeMonth||'all';
+    const demandLabel={hi:'HIGH',md:'MED',lo:'LOW'};
+    const demandCls={hi:'demand-hi',md:'demand-md',lo:'demand-lo'};
+    const filtered=CATS.filter(c=>{
+      const matchQ=!q||(c.t+c.sub+(c.keywords||[]).join(' ')).toLowerCase().includes(q);
+      const matchM=m==='all'||(m==='0'?c.month===0:String(c.month)===m);
+      return matchQ&&matchM;
+    });
+    if(!filtered.length){
+      g.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:16px;font-size:11px;color:var(--txt3)">No categories found</div>`;
+      return;
+    }
+    g.innerHTML=filtered.map(c=>`
+      <button class="cat-btn${c.id===this.cat?' active':''}" data-cat="${c.id}" onclick="S.setCat('${c.id}')">
+        <span class="cat-ic">${c.i}</span>
+        <span class="cat-btn-name">${c.t}</span>
+        ${c.ageTag?`<span class="age-badge">${c.ageTag}</span>`:''}
+        ${c.demand&&!c.ageTag?`<span class="demand-badge ${demandCls[c.demand]||''}">${demandLabel[c.demand]||''}</span>`:''}
+      </button>
+    `).join('');
+    // update active state
+    document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',b.dataset.cat===this.cat));
+  },
+
+  renderMods(){
+    const g=document.getElementById('modsGrid');
+    if(!g)return;
+    g.innerHTML=MODS_LIST.map(m=>`
+      <span class="mod-chip" data-mod="${m}" onclick="S.toggleMod('${m}')">${m}</span>
+    `).join('');
+  },
+
+  renderTemplates(){
+    const g=document.getElementById('tplGrid');
+    if(!g)return;
+    g.innerHTML=TEMPLATES.map((t,i)=>`
+      <button class="tpl-btn" onclick="S.applyTemplate(TEMPLATES[${i}])">
+        <span class="tpl-ic">${t.i}</span>${t.t}
+      </button>
+    `).join('');
+  },
+
+  renderSinglePrompt(prompt,cat){
+    const area=document.getElementById('outputArea');
+    const engLabels={mj:'Midjourney v7 + Niji 6',nb2:'NB2 Structured (ID)',sd:'Stable Diffusion',
+      gem:'Google Gemini',flow:'Flow / Automatic1111',leo:'Leonardo AI'};
+    const dotClass={mj:'dot-mj',nb2:'dot-nb2',sd:'dot-sd',gem:'dot-gem',flow:'dot-flow',leo:'dot-leo'};
+    const chars=prompt.length;
+    area.innerHTML=`
+      <div class="prompt-block engine-${this.engine}">
+        <div class="prompt-header">
+          <div class="prompt-label">
+            <span class="dot ${dotClass[this.engine]||'dot-mj'}"></span>
+            ${engLabels[this.engine]||this.engine.toUpperCase()}
+          </div>
+          <div class="prompt-actions">
+            <span style="font-size:10px;color:var(--txt3);font-family:'JetBrains Mono',monospace">${chars} chars</span>
+            <button class="copy-btn" onclick="S.copyPrompt(this,'${this.engine}')">📋 Copy</button>
+          </div>
+        </div>
+        <div class="prompt-body" id="promptBody">${this.escHtml(prompt)}</div>
+        <div class="kw-tags">
+          ${(cat.keywords||[]).map(k=>`<span class="kw-tag">${k}</span>`).join('')}
+        </div>
+      </div>
+      <div class="prompt-block" style="border-color:var(--brd)">
+        <div class="prompt-header">
+          <div class="prompt-label" style="color:var(--txt2)">All Engines — One Click</div>
+        </div>
+        <div style="padding:10px 14px;display:flex;flex-wrap:wrap;gap:6px">
+          ${['mj','nb2','gem','flow','sd','leo'].map(e=>`
+            <button class="btn btn-outline btn-sm" onclick="S.switchEngine('${e}')">
+              ${({mj:'🎯 MJ',nb2:'📝 NB2',gem:'🔵 Gemini',flow:'🌊 Flow',sd:'🖼 SD',leo:'🦁 Leonardo'})[e]}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  },
+
+  switchEngine(e){
+    this.setEngine(e);
+    this.generate();
+  },
+
+  renderVariationsPanel(){
+    const area=document.getElementById('outputArea');
+    if(!this.lastVariations||!this.lastVariations.length){
+      area.innerHTML='<div class="empty"><div class="empty-icon">⚡</div><p>Click <strong>Generate 30 Vars</strong> to create variations.</p></div>';
+      return;
+    }
+    area.innerHTML=`
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:12px;color:var(--txt2)">${this.lastVariations.length} variations • Mode: <strong style="color:var(--gr)">${this.varMode}</strong></span>
+        <button class="btn btn-outline btn-xs" onclick="S.copyAllVars()">📋 Copy All</button>
+      </div>
+      <div class="var-grid">
+        ${this.lastVariations.map(v=>`
+          <div class="var-card">
+            <div class="var-card-head">
+              <span class="var-num">VAR #${v.num}</span>
+              <span style="font-size:10px;color:var(--txt3)">${v.seed}</span>
+              <button class="copy-btn" onclick="S.copyText('${this.escAttr(v.prompt)}')">📋</button>
+            </div>
+            <div class="var-card-body">${this.escHtml(v.prompt.substring(0,200))}${v.prompt.length>200?'…':''}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  },
+
+  renderSEO(){
+    const area=document.getElementById('outputArea');
+    const cat=CATS.find(x=>x.id===this.cat);
+    if(!cat)return;
+    const p=PLATFORMS[this.platform];
+    const tb=this.getStickerTechBlock();
+
+    const title=`${cat.seoBase} ${tb.cut} ${tb.finish} ${p.name}`.substring(0,140);
+    const tags=cat.keywords.concat([tb.cut,tb.finish,'kawaii sticker','digital download','printable sticker']).slice(0,p.maxTags||13);
+    const desc=`${cat.t} sticker — ${cat.sub}. Perfect for ${p.name} print-on-demand. Format: ${tb.size}, ${tb.cut}, ${tb.finish}. Transparent PNG ready for printing. Keywords: ${cat.keywords.slice(0,6).join(', ')}.`;
+
+    const platformSEO={
+      line:`LINE Sticker Set: ${cat.t}\nCanvas: 370×320px per sticker\nBackground: transparent PNG\nMax file: 1MB per sticker, 40 stickers per set\nSubmit to: LINE Creator Market`,
+      whatsapp:`WhatsApp Sticker: ${cat.t}\nCanvas: 512×512px\nFormat: WebP <100KB\nPack: 3-30 stickers + 1 tray image 96×96px`,
+      shopee:`Shopee Digital Product: ${cat.t} Sticker Pack\nTags (max 20): ${tags.join(', ')}\nCategory: Digital Products > Sticker`,
+    };
+
+    area.innerHTML=`
+      <div class="seo-panel">
+        <div class="seo-header">
+          <span class="seo-title">📊 SEO Panel — ${p.name}</span>
+          <button class="btn btn-outline btn-xs" onclick="S.copySEO()">📋 Copy All SEO</button>
+        </div>
+        <div class="seo-body">
+          <div class="seo-row">
+            <label>Title (${title.length}/140 chars)</label>
+            <div class="seo-val" id="seoTitle">${this.escHtml(title)}</div>
+          </div>
+          <div class="seo-row">
+            <label>Tags (${tags.length}/${p.maxTags||13})</label>
+            <div class="seo-tags">${tags.map(t=>`<span class="seo-tag">${t}</span>`).join('')}</div>
+          </div>
+          <div class="seo-row">
+            <label>Description</label>
+            <div class="seo-val">${this.escHtml(desc)}</div>
+          </div>
+          ${platformSEO[this.platform]?`
+          <div class="seo-row">
+            <label>Platform-Specific Notes</label>
+            <div class="seo-val" style="white-space:pre-wrap">${this.escHtml(platformSEO[this.platform])}</div>
+          </div>`:''}
+          <div class="seo-row">
+            <label>Technical Spec</label>
+            <div class="seo-val">${this.escHtml(`Size: ${tb.size}\nFormat: PNG transparent\nCut: ${tb.cut}\nFinish: ${tb.finish}\nOutline: ${tb.outline}\n${p.sizeNote||''}\n${p.formatNote||''}`)}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  },
+
+  renderHistory(){
+    const area=document.getElementById('outputArea');
+    if(!this.history.length){
+      area.innerHTML='<div class="empty"><div class="empty-icon">📜</div><p>No history yet. Generate some prompts first!</p></div>';
+      return;
+    }
+    area.innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:12px;color:var(--txt2)">${this.history.length} prompts saved</span>
+        <button class="btn btn-outline btn-xs" onclick="S.clearHistory()">🗑 Clear All</button>
+      </div>
+      <div class="history-list">
+        ${this.history.slice().reverse().map((h,i)=>`
+          <div class="hist-item" onclick="S.restoreHistory(${this.history.length-1-i})">
+            <div style="flex:1">
+              <div style="font-size:11px;color:var(--cy);margin-bottom:3px">${h.cat} • ${h.engine.toUpperCase()} • ${h.platform}</div>
+              <div class="hist-preview">${this.escHtml(h.prompt)}</div>
+            </div>
+            <div class="hist-meta">
+              <div>${h.time}</div>
+              <button class="copy-btn btn-xs" onclick="event.stopPropagation();S.copyText('${this.escAttr(h.prompt)}')">📋</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  },
+
+  renderTips(){
+    const area=document.getElementById('outputArea');
+    area.innerHTML=`
+    <div style="max-width:800px;margin:0 auto;display:flex;flex-direction:column;gap:12px">
+
+      <div class="guide-section-title">📖 CARA PAKAI — SIMPLE MODE (Pemula)</div>
+
+      <div class="guide-step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Pilih tema stiker (Category)</h4>
+          <p>Cari kategori yang kamu inginkan di sidebar kiri. Gunakan <code>Search</code> atau filter bulan (Jan–Dec).
+          Badge <span style="color:#ff6b6b;font-weight:700">HIGH</span> = permintaan pasar tinggi.
+          Badge <span style="color:var(--gr);font-weight:700">4-7y</span> = cocok untuk anak-anak.</p>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Pilih AI Engine</h4>
+          <p>
+            <code>🎨 Midjourney</code> — terbaik untuk kualitas visual. Paste ke Discord /imagine<br>
+            <code>✨ Gemini</code> — Google Gemini Imagen. Instruksi natural language detail<br>
+            <code>🇮🇩 NB2 ID</code> — prompt terstruktur Bahasa Indonesia<br>
+            <code>🇬🇧 EN Struct</code> — prompt terstruktur Bahasa Inggris (baru!)<br>
+            <code>🌊 Flow</code> — Stable Diffusion + settings otomatis<br>
+            <code>🦁 Leonardo</code> — Leonardo.ai dengan model recommendation
+          </p>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Klik ✨ Generate Prompt</h4>
+          <p>Prompt siap pakai akan muncul di panel kanan. Klik <code>Copy</code> lalu paste langsung ke AI tool kamu.
+          Klik <code>⚡ Generate 30 Vars</code> untuk dapat 30 variasi sekaligus dari tema yang sama.</p>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Cek SEO Panel (untuk listing toko)</h4>
+          <p>Klik tab <code>• SEO Panel</code> untuk lihat judul, tags, dan deskripsi siap upload ke Etsy / Shopee / Redbubble.
+          Klik <code>Copy</code> pada masing-masing bagian.</p>
+        </div>
+      </div>
+
+      <div class="guide-section-title">🔥 QUICK START — Cara Tercepat</div>
+
+      <div class="tip-card">
+        <h4>⚡ Gunakan panel "Quick Start" di sidebar</h4>
+        <p>Klik salah satu combo di panel <strong>Quick Start</strong> → semua setting (kategori + engine + platform + finish) otomatis diterapkan dan prompt langsung ter-generate. Tidak perlu setting manual apa pun.</p>
+        <p style="margin-top:6px"><code>🌙 Idul Adha Pack</code> → Etsy + Midjourney + holographic die-cut<br>
+        <code>🎀 Sanrio Style</code> → Shopee + Gemini + Commercial Safe<br>
+        <code>📓 Digital Planner</code> → Etsy + EN Struct + matte (GoodNotes ready)</p>
+      </div>
+
+      <div class="guide-section-title">🔧 EXPERT MODE — Fitur Lanjutan</div>
+
+      <div class="tip-card">
+        <h4>Aktifkan Expert Mode untuk akses semua opsi</h4>
+        <ul>
+          <li><strong>Sticker Technical:</strong> Cut type (die-cut/kiss-cut/square), Finish (glossy/matte/holo), Outline style</li>
+          <li><strong>Sticker Format:</strong> Single Icon vs Sheet Pack (grid 6×4=24, 4×4=16, 5×5=25, 8×4=32, 6×6=36)</li>
+          <li><strong>Variation Mode:</strong> Standard / Expression / Character / Accessory / Seasonal / Sheet</li>
+          <li><strong>Style Modifiers:</strong> Tambah efek ✨sparkle, 🌈rainbow, 🔥fire, dll</li>
+          <li><strong>⚖️ Commercial Safe Mode:</strong> Wajib ON untuk kategori Pokemon/Sanrio jika dijual komersial</li>
+        </ul>
+      </div>
+
+      <div class="guide-section-title">📐 PANDUAN TEKNIS STIKER</div>
+
+      <div class="tips-grid">
+        <div class="tip-card">
+          <h4>🎯 Midjourney Tips</h4>
+          <ul>
+            <li><code>--niji 6</code> = kawaii/anime style terbaik</li>
+            <li><code>--stylize 850</code> = lebih kreatif</li>
+            <li><code>--style raw</code> = ikuti prompt persis</li>
+            <li><code>--ar 1:1</code> = square untuk single stiker</li>
+            <li><code>--ar 4:3</code> = landscape untuk sheet pack</li>
+            <li>Upscale <code>U1–U4</code> sebelum download</li>
+          </ul>
+        </div>
+        <div class="tip-card">
+          <h4>💎 Format Potong Stiker</h4>
+          <ul>
+            <li><strong>Die-cut:</strong> dipotong pas siluet karakter — paling premium</li>
+            <li><strong>Kiss-cut:</strong> backing utuh, untuk sheet pack, mudah dilepas</li>
+            <li><strong>Square/Circle:</strong> lebih murah, cocok untuk digital</li>
+            <li>Etsy buyers: lebih suka die-cut individual</li>
+            <li>Sheet pack: pakai kiss-cut selalu</li>
+          </ul>
+        </div>
+        <div class="tip-card">
+          <h4>✨ Pilih Finishing yang Tepat</h4>
+          <ul>
+            <li><strong>Glossy:</strong> warna cerah, paling populer</li>
+            <li><strong>Matte:</strong> elegan, bisa ditulis, cocok planner</li>
+            <li><strong>Holographic:</strong> premium, harga lebih tinggi</li>
+            <li><strong>Clear:</strong> minimalis, background transparan kelihatan</li>
+            <li><strong>Glitter:</strong> berkilau, pasar craft/anak-anak</li>
+          </ul>
+        </div>
+        <div class="tip-card">
+          <h4>📦 Spesifikasi Platform</h4>
+          <ul>
+            <li><strong>Etsy:</strong> PNG 300 DPI, 3000px+</li>
+            <li><strong>Redbubble:</strong> 7632×6480px at 72 DPI</li>
+            <li><strong>LINE Creator:</strong> 370×320px, max 1MB</li>
+            <li><strong>WhatsApp:</strong> 512×512px WebP, &lt;100KB</li>
+            <li><strong>Shopee Digital:</strong> 800×800px min, 1:1</li>
+          </ul>
+        </div>
+        <div class="tip-card">
+          <h4>🔥 Kategori Paling Laris</h4>
+          <ul>
+            <li>🌙 Ramadan & Idul Adha — lonjakan musiman ID</li>
+            <li>🖤 Dark Kawaii / Pastel Goth — trending Etsy global</li>
+            <li>👩‍⚕️ Nurse/Teacher packs — pasar gifting</li>
+            <li>📓 Planner stickers — pembelian berulang</li>
+            <li>🎃 Seasonal (Halloween, Christmas) — spike penjualan</li>
+            <li>🎀 Sanrio-inspired — fanbase sangat loyal</li>
+          </ul>
+        </div>
+        <div class="tip-card">
+          <h4>⚖️ Copyright Safety</h4>
+          <ul>
+            <li>Aktifkan <strong>Commercial Safe Mode</strong> untuk kategori Pokemon, Sanrio</li>
+            <li>Safe = deskripsi visual saja, tanpa nama brand</li>
+            <li>Reference mode hanya untuk latihan personal, JANGAN dijual</li>
+            <li>Kategori lain (Kawaii, Islamic, Kids) = aman dijual</li>
+            <li>Selalu cek TOS platform tujuan kamu</li>
+          </ul>
+        </div>
+      </div>
+    </div>`;
+  },
+
+  // ── HISTORY ──────────────────────────────────────
+  addHistory(prompt,cat){
+    const now=new Date();
+    const time=`${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+    this.history.push({prompt,cat:cat.id,engine:this.engine,platform:this.platform,time});
+    if(this.history.length>50)this.history.shift();
+    try{localStorage.setItem('stickerHistory',JSON.stringify(this.history))}catch(e){}
+  },
+
+  loadHistory(){
+    try{
+      const h=localStorage.getItem('stickerHistory');
+      if(h)this.history=JSON.parse(h);
+    }catch(e){}
+  },
+
+  clearHistory(){
+    this.history=[];
+    try{localStorage.removeItem('stickerHistory')}catch(e){}
+    this.varCount=0;
+    this.lastVariations=[];
+    this.updateStats();
+    if(this.tab==='history')this.renderHistory();
+    this.toast('History cleared');
+  },
+
+  restoreHistory(i){
+    const h=this.history[i];
+    if(!h)return;
+    this.engine=h.engine;
+    this.platform=h.platform;
+    this.setCat(h.cat);
+    document.querySelectorAll('.eng-btn').forEach(b=>b.classList.toggle('active',b.dataset.eng===h.engine));
+    document.querySelectorAll('.plat-btn').forEach(b=>b.classList.toggle('active',b.dataset.plat===h.platform));
+    const cat=CATS.find(x=>x.id===h.cat);
+    this.setTab('prompt');
+    this.renderSinglePrompt(h.prompt,cat||CATS[0]);
+    this.toast('Prompt restored');
+  },
+
+  // ── COPY ─────────────────────────────────────────
+  copyPrompt(btn,engine){
+    const prompt=this.lastPrompts[engine]||document.getElementById('promptBody')?.textContent||'';
+    this.copyText(prompt,btn);
+  },
+
+  copyText(text,btn){
+    const decoded=text.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"');
+    navigator.clipboard.writeText(decoded).then(()=>{
+      if(btn){btn.textContent='✅ Copied!';btn.classList.add('copied');setTimeout(()=>{btn.textContent='📋 Copy';btn.classList.remove('copied')},1800)}
+      else this.toast('Copied to clipboard!');
+    }).catch(()=>this.toast('Copy failed'));
+  },
+
+  copyAll(){
+    const all=Object.values(this.lastPrompts).join('\n\n---\n\n');
+    if(!all.trim()){this.toast('Generate a prompt first');return}
+    navigator.clipboard.writeText(all).then(()=>this.toast('All prompts copied!'));
+  },
+
+  copyAllVars(){
+    if(!this.lastVariations)return;
+    const all=this.lastVariations.map(v=>`=== VAR #${v.num} — ${v.seed} ===\n${v.prompt}`).join('\n\n');
+    navigator.clipboard.writeText(all).then(()=>this.toast(`${this.lastVariations.length} variations copied!`));
+  },
+
+  copySEO(){
+    const title=document.getElementById('seoTitle')?.textContent||'';
+    navigator.clipboard.writeText(title).then(()=>this.toast('SEO title copied!'));
+  },
+
+  exportJSON(){
+    const data={
+      category:this.cat,platform:this.platform,engine:this.engine,
+      cutType:this.cutType,finish:this.finish,sizePreset:this.sizePreset,outlineStyle:this.outlineStyle,
+      prompts:this.lastPrompts,
+      variations:this.lastVariations||[],
+      exported:new Date().toISOString(),
+    };
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download=`sticker_prompts_${this.cat}_${Date.now()}.json`;
+    a.click();URL.revokeObjectURL(url);
+    this.toast('JSON exported!');
+  },
+
+  // ── UTILS ─────────────────────────────────────────
+  escHtml(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  },
+  escAttr(s){
+    return String(s).replace(/'/g,"\\'").replace(/\n/g,'\\n').replace(/\r/g,'');
+  },
+
+  toast(msg,dur=2200,color=null){
+    const t=document.getElementById('toast');
+    if(!t)return;
+    t.textContent=msg;
+    t.style.color=color||'';
+    t.style.borderColor=color||'';
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),dur);
+  },
+
+  // alias for toggleCommercial
+  showToast(msg,dur,color){this.toast(msg,dur,color);},
+
+  // ── PANDUAN MODAL ──────────────────────────────────
+  openGuide(){
+    document.getElementById('guideModal').classList.add('open');
+    document.body.style.overflow='hidden';
+  },
+  closeGuide(){
+    document.getElementById('guideModal').classList.remove('open');
+    document.body.style.overflow='';
+  },
+  gmTab(id,btn){
+    // hide all bodies
+    document.querySelectorAll('.gm-body').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.gm-tab').forEach(b=>b.classList.remove('active'));
+    const el=document.getElementById('gm-'+id);
+    if(el)el.classList.add('active');
+    if(btn)btn.classList.add('active');
+  },
+};
+
+// ══════════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>S.init());
+</script>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PANDUAN MODAL                                          -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="gm-overlay" id="guideModal" onclick="if(event.target===this)S.closeGuide()">
+  <div class="gm-box">
+
+    <!-- HEADER -->
+    <div class="gm-head">
+      <div>
+        <div class="gm-head-title">📖 Panduan Lengkap — Sticker Prompt Studio</div>
+        <div class="gm-head-sub">Cara pakai, kombinasi terbaik, dan referensi teknis stiker</div>
+      </div>
+      <button class="gm-close" onclick="S.closeGuide()">✕</button>
+    </div>
+
+    <!-- TABS -->
+    <div class="gm-tabs">
+      <button class="gm-tab active" onclick="S.gmTab('start',this)">🚀 Mulai di Sini</button>
+      <button class="gm-tab" onclick="S.gmTab('combo',this)">🎯 Panduan Kombinasi</button>
+      <button class="gm-tab" onclick="S.gmTab('engine',this)">🔧 Engine Guide</button>
+      <button class="gm-tab" onclick="S.gmTab('platform',this)">📦 Platform & Specs</button>
+    </div>
+
+    <!-- TAB: MULAI DI SINI -->
+    <div class="gm-body active" id="gm-start">
+
+      <div class="gm-sec-title">🚀 Workflow Dasar — 4 Langkah</div>
+
+      <div class="gm-step">
+        <div class="gm-step-num">1</div>
+        <div>
+          <h4>Pilih Platform Jual Dulu</h4>
+          <p>Sebelum generate, tentukan platform penjualan. Setiap platform punya spesifikasi berbeda.</p>
+          <ul>
+            <li><strong>Etsy / Redbubble</strong> → stiker fisik / digital PNG, fokus kualitas tinggi</li>
+            <li><strong>Shopee</strong> → pasar Indonesia, harga lebih kompetitif</li>
+            <li><strong>LINE Creator</strong> → animasi/stiker chat, ukuran kecil</li>
+            <li><strong>WhatsApp</strong> → pack 512×512px WebP, max 30 stiker/pack</li>
+            <li><strong>DTF (Direct to Film)</strong> → cetak ke baju/merchandise, resolusi tinggi</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="gm-step">
+        <div class="gm-step-num">2</div>
+        <div>
+          <h4>Pilih Kategori Tema</h4>
+          <p>Gunakan sidebar kiri untuk pilih tema stiker. Tips cepat:</p>
+          <ul>
+            <li>Badge <span style="color:#ff6b6b;font-weight:700">HIGH</span> = permintaan pasar sedang tinggi → prioritaskan ini</li>
+            <li>Filter bulan (<strong>Jan–Dec</strong>) untuk tema seasonal / momen khusus</li>
+            <li>Filter <strong>Ever</strong> untuk tema yang laku sepanjang tahun (evergreen)</li>
+            <li>Kolom <strong>Search</strong> untuk cari tema spesifik (mis: "ramadan", "dino", "nurse")</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="gm-step">
+        <div class="gm-step-num">3</div>
+        <div>
+          <h4>Pilih Engine & Klik Generate</h4>
+          <p>Pilih AI engine sesuai tool yang kamu pakai, lalu klik <strong>✨ Generate Prompt</strong>:</p>
+          <ul>
+            <li><strong>Midjourney</strong> → kualitas terbaik, paste ke Discord <code>/imagine</code></li>
+            <li><strong>Gemini / Flow</strong> → Google tools, natural language, drag-drop langsung</li>
+            <li><strong>NB2 ID</strong> → prompt Bahasa Indonesia terstruktur</li>
+            <li><strong>EN Struct</strong> → prompt Bahasa Inggris terstruktur, cocok untuk referensi internasional</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="gm-step">
+        <div class="gm-step-num">4</div>
+        <div>
+          <h4>Copy Prompt → Paste ke AI Tool</h4>
+          <p>Klik tombol <strong>Copy</strong> di prompt output, lalu paste ke tool AI yang kamu pilih.</p>
+          <ul>
+            <li>Untuk 30 variasi sekaligus → klik <strong>⚡ Generate 30 Vars</strong></li>
+            <li>Untuk data listing toko → klik tab <strong>SEO Panel</strong> (judul, tags, deskripsi Etsy/Shopee)</li>
+            <li>Prompt sebelumnya tersimpan di tab <strong>History</strong></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="gm-sec-title">⚡ Cara Tercepat — Quick Start</div>
+      <div class="gm-card">
+        <h4>Panel Quick Start di sidebar → 1 klik, langsung jadi</h4>
+        <p style="margin-bottom:8px">Klik salah satu preset combo di panel <strong>⚡ Quick Start</strong> dan semua setting (kategori + engine + platform + finish + cut) otomatis diterapkan, prompt langsung ter-generate. Tidak perlu konfigurasi apapun.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;font-size:11px">
+          <div style="background:var(--bg4);border:1px solid var(--brd);border-radius:var(--rad);padding:8px">🔥 <strong>Trending Kawaii</strong> → Etsy + MJ + die-cut glossy</div>
+          <div style="background:var(--bg4);border:1px solid var(--brd);border-radius:var(--rad);padding:8px">🌙 <strong>Idul Adha Pack</strong> → Etsy + MJ + holographic</div>
+          <div style="background:var(--bg4);border:1px solid var(--brd);border-radius:var(--rad);padding:8px">🎀 <strong>Sanrio Style</strong> → Shopee + Gemini + Commercial Safe</div>
+          <div style="background:var(--bg4);border:1px solid var(--brd);border-radius:var(--rad);padding:8px">🦕 <strong>Kids Dino</strong> → Etsy + NB2 + matte die-cut</div>
+          <div style="background:var(--bg4);border:1px solid var(--brd);border-radius:var(--rad);padding:8px">🇮🇩 <strong>17 Agustus</strong> → Shopee + MJ + holographic</div>
+          <div style="background:var(--bg4);border:1px solid var(--brd);border-radius:var(--rad);padding:8px">📓 <strong>Digital Planner</strong> → Etsy + EN Struct + matte</div>
+        </div>
+      </div>
+
+      <div class="gm-sec-title">🔧 Aktifkan Expert Mode untuk Fitur Lanjutan</div>
+      <div class="gm-card">
+        <p style="margin-bottom:8px">Klik tombol <strong>Expert</strong> di mode bar (sidebar atas) untuk membuka fitur tambahan:</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px">
+          <div><span class="tpill tp-ac">Sticker Technical</span> — pilih cut type, finishing, outline style</div>
+          <div><span class="tpill tp-cy">Sheet Pack</span> — grid layout 6×4, 4×4, 5×5, 8×4, 6×6</div>
+          <div><span class="tpill tp-ye">Variation Mode</span> — Standard / Expression / Character / Accessory / Sheet</div>
+          <div><span class="tpill tp-gr">Style Modifiers</span> — efek sparkle, rainbow, fire, glitter, dll</div>
+          <div><span class="tpill tp-or">Commercial Safe</span> — wajib ON untuk Pokemon/Sanrio jika dijual</div>
+          <div><span class="tpill tp-pi">All Engines</span> — akses semua 6 engine (Simple hanya 3)</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TAB: PANDUAN KOMBINASI -->
+    <div class="gm-body" id="gm-combo">
+
+      <div class="gm-sec-title">🎯 Pilih Kombinasi Berdasarkan Tujuan</div>
+
+      <div class="gm-table-wrap">
+        <table class="combo-tbl">
+          <thead>
+            <tr>
+              <th>🎯 Tujuanmu</th>
+              <th>🛍️ Platform</th>
+              <th>🤖 Engine</th>
+              <th>✂️ Cut Type</th>
+              <th>✨ Finishing</th>
+              <th>📁 Format</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Jual stiker fisik premium di Etsy</strong></td>
+              <td><span class="tpill tp-ye">Etsy</span></td>
+              <td><span class="tpill tp-ac">Midjourney</span></td>
+              <td>Die-cut</td>
+              <td>Glossy / Holographic</td>
+              <td>Single Icon</td>
+            </tr>
+            <tr>
+              <td><strong>Buat sheet pack (banyak stiker 1 lembar)</strong></td>
+              <td><span class="tpill tp-ye">Etsy</span></td>
+              <td><span class="tpill tp-ac">Midjourney</span></td>
+              <td>Kiss-cut</td>
+              <td>Matte / Glossy</td>
+              <td>Sheet Pack 6×4</td>
+            </tr>
+            <tr>
+              <td><strong>Jual digital file (PNG) di Etsy/Shopee</strong></td>
+              <td><span class="tpill tp-ye">Etsy</span> <span class="tpill tp-or">Shopee</span></td>
+              <td><span class="tpill tp-cy">EN Struct</span></td>
+              <td>Die-cut</td>
+              <td>Clear / Transparent</td>
+              <td>Single / Sheet</td>
+            </tr>
+            <tr>
+              <td><strong>Stiker LINE Creator Market</strong></td>
+              <td><span class="tpill tp-gr">LINE</span></td>
+              <td><span class="tpill tp-ac">Midjourney</span> <span class="tpill tp-pi">NB2</span></td>
+              <td>Square</td>
+              <td>Clear</td>
+              <td>Single Icon</td>
+            </tr>
+            <tr>
+              <td><strong>WhatsApp Sticker Pack</strong></td>
+              <td><span class="tpill tp-gr">WhatsApp</span></td>
+              <td><span class="tpill tp-ac">Midjourney</span> <span class="tpill tp-pi">NB2</span></td>
+              <td>Square / Die-cut</td>
+              <td>Clear</td>
+              <td>Single (×30)</td>
+            </tr>
+            <tr>
+              <td><strong>Planner stiker untuk GoodNotes/Notion</strong></td>
+              <td><span class="tpill tp-ye">Etsy</span></td>
+              <td><span class="tpill tp-cy">EN Struct</span></td>
+              <td>Square / Die-cut</td>
+              <td>Matte / Clear</td>
+              <td>Sheet Pack 8×4</td>
+            </tr>
+            <tr>
+              <td><strong>Kaos DTF print merchandise</strong></td>
+              <td><span class="tpill tp-or">DTF</span></td>
+              <td><span class="tpill tp-ac">Midjourney</span> <span class="tpill tp-cy">Flow</span></td>
+              <td>Die-cut</td>
+              <td>Matte</td>
+              <td>Single Icon</td>
+            </tr>
+            <tr>
+              <td><strong>Stiker tema Ramadan/Idul Adha</strong></td>
+              <td><span class="tpill tp-or">Shopee</span> <span class="tpill tp-ye">Etsy</span></td>
+              <td><span class="tpill tp-ac">Midjourney</span></td>
+              <td>Die-cut</td>
+              <td>Holographic</td>
+              <td>Single + Sheet</td>
+            </tr>
+            <tr>
+              <td><strong>Stiker karakter Pokemon/Sanrio</strong></td>
+              <td><span class="tpill tp-or">Shopee</span></td>
+              <td><span class="tpill tp-pi">Gemini</span> <span class="tpill tp-ac">MJ</span></td>
+              <td>Die-cut</td>
+              <td>Glossy</td>
+              <td>Single (Commercial Safe ON!)</td>
+            </tr>
+            <tr>
+              <td><strong>Stiker anak-anak umur 4-7 tahun</strong></td>
+              <td><span class="tpill tp-ye">Etsy</span> <span class="tpill tp-or">Shopee</span></td>
+              <td><span class="tpill tp-pi">NB2</span> <span class="tpill tp-cy">EN Struct</span></td>
+              <td>Die-cut / Square</td>
+              <td>Glossy / Glitter</td>
+              <td>Sheet Pack 4×4</td>
+            </tr>
+            <tr>
+              <td><strong>Riset / latihan (tidak dijual)</strong></td>
+              <td>—</td>
+              <td><span class="tpill tp-ac">Midjourney</span></td>
+              <td>Die-cut</td>
+              <td>Glossy</td>
+              <td>Single / 30 Vars</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="gm-sec-title">🔁 Kombinasi Engine × Platform (Matriks Terbaik)</div>
+
+      <div class="gm-table-wrap">
+        <table class="combo-tbl">
+          <thead>
+            <tr>
+              <th>Engine</th>
+              <th>Etsy</th>
+              <th>Shopee</th>
+              <th>LINE</th>
+              <th>WhatsApp</th>
+              <th>Redbubble</th>
+              <th>DTF</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>🎨 Midjourney</strong></td>
+              <td><span class="tpill tp-gr">⭐ TERBAIK</span></td>
+              <td><span class="tpill tp-ye">Bagus</span></td>
+              <td><span class="tpill tp-ye">Bagus</span></td>
+              <td><span class="tpill tp-ye">Bagus</span></td>
+              <td><span class="tpill tp-gr">⭐ TERBAIK</span></td>
+              <td><span class="tpill tp-gr">⭐ TERBAIK</span></td>
+            </tr>
+            <tr>
+              <td><strong>✨ Gemini</strong></td>
+              <td><span class="tpill tp-ye">Bagus</span></td>
+              <td><span class="tpill tp-gr">⭐ TERBAIK</span></td>
+              <td><span class="tpill tp-cy">OK</span></td>
+              <td><span class="tpill tp-cy">OK</span></td>
+              <td><span class="tpill tp-ye">Bagus</span></td>
+              <td><span class="tpill tp-cy">OK</span></td>
+            </tr>
+            <tr>
+              <td><strong>🇮🇩 NB2 ID</strong></td>
+              <td><span class="tpill tp-ye">Bagus</span></td>
+              <td><span class="tpill tp-gr">⭐ TERBAIK</span></td>
+              <td><span class="tpill tp-gr">⭐ TERBAIK</span></td>
+              <td><span class="tpill tp-gr">⭐ TERBAIK</span></td>
+              <td><span class="tpill tp-cy">OK</span></td>
+              <td><span class="tpill tp-cy">OK</span></td>
+            </tr>
+            <tr>
+              <td><strong>🇬🇧 EN Struct</strong></td>
+              <td><span class="tpill tp-gr">⭐ TERBAIK</span></td>
+              <td><span class="tpill tp-ye">Bagus</span></td>
+              <td><span class="tpill tp-cy">OK</span></td>
+              <td><span class="tpill tp-cy">OK</span></td>
+              <td><span class="tpill tp-gr">⭐ TERBAIK</span></td>
+              <td><span class="tpill tp-ye">Bagus</span></td>
+            </tr>
+            <tr>
+              <td><strong>🌊 Flow</strong></td>
+              <td><span class="tpill tp-ye">Bagus</span></td>
+              <td><span class="tpill tp-ye">Bagus</span></td>
+              <td><span class="tpill tp-cy">OK</span></td>
+              <td><span class="tpill tp-cy">OK</span></td>
+              <td><span class="tpill tp-ye">Bagus</span></td>
+              <td><span class="tpill tp-gr">⭐ TERBAIK</span></td>
+            </tr>
+            <tr>
+              <td><strong>🦁 Leonardo</strong></td>
+              <td><span class="tpill tp-ye">Bagus</span></td>
+              <td><span class="tpill tp-cy">OK</span></td>
+              <td><span class="tpill tp-cy">OK</span></td>
+              <td><span class="tpill tp-cy">OK</span></td>
+              <td><span class="tpill tp-ye">Bagus</span></td>
+              <td><span class="tpill tp-ye">Bagus</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="gm-sec-title">💡 Kombinasi Finishing × Kategori</div>
+
+      <div class="gm-table-wrap">
+        <table class="combo-tbl">
+          <thead>
+            <tr>
+              <th>Finishing</th>
+              <th>Cocok Untuk</th>
+              <th>Target Pasar</th>
+              <th>Harga Jual</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>✨ Glossy</strong></td>
+              <td>Kawaii, Dark Kawaii, Pokemon, Sanrio, Kids, Seasonal</td>
+              <td>Umum, paling populer</td>
+              <td>Standard</td>
+            </tr>
+            <tr>
+              <td><strong>🌈 Holographic</strong></td>
+              <td>Ramadan, Idul Adha, 17 Agustus, Dark Kawaii, Pokemon</td>
+              <td>Premium buyer, gift market</td>
+              <td>Premium (+30-50%)</td>
+            </tr>
+            <tr>
+              <td><strong>⬜ Matte</strong></td>
+              <td>Planner, Bujo, Nature, Minimal, Teacher/Nurse</td>
+              <td>Planner community, dewasa</td>
+              <td>Standard</td>
+            </tr>
+            <tr>
+              <td><strong>🔍 Clear / Transparent</strong></td>
+              <td>Digital Sticker, LINE, WhatsApp, Minimal</td>
+              <td>Digital product buyer</td>
+              <td>Budget</td>
+            </tr>
+            <tr>
+              <td><strong>💎 Glitter</strong></td>
+              <td>Kids (4-7y), Princess/Unicorn, Rainbow Learning</td>
+              <td>Anak-anak, orang tua</td>
+              <td>Premium</td>
+            </tr>
+            <tr>
+              <td><strong>🎨 Epoxy (3D)</strong></td>
+              <td>Dark Kawaii, Pokemon, Sanrio, special edition</td>
+              <td>Collector, premium buyer</td>
+              <td>Sangat Premium</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- TAB: ENGINE GUIDE -->
+    <div class="gm-body" id="gm-engine">
+
+      <div class="gm-sec-title">🔧 Panduan Setiap AI Engine</div>
+
+      <div class="engine-grid">
+
+        <div class="eng-card" style="border-color:rgba(201,63,255,.4)">
+          <div class="eng-card-head">
+            <span class="eng-card-icon">🎨</span>
+            <div>
+              <h4>Midjourney</h4>
+              <div class="eng-tag">Discord /imagine · niji 6 · v7</div>
+            </div>
+          </div>
+          <ul>
+            <li>Kualitas visual <strong>terbaik</strong> untuk stiker</li>
+            <li>Paste prompt ke Discord bot: <code>/imagine [prompt]</code></li>
+            <li><code>--niji 6</code> = gaya kawaii/anime</li>
+            <li><code>--v 7</code> = gaya realistis/ilustrasi</li>
+            <li><code>--stylize 850</code> = lebih kreatif & artistik</li>
+            <li><code>--ar 1:1</code> = square (single icon)</li>
+            <li><code>--ar 4:3</code> = landscape (sheet pack)</li>
+            <li>Klik <code>U1–U4</code> untuk upscale setelah generate</li>
+            <li>Cocok untuk: Etsy, Redbubble, DTF</li>
+          </ul>
+        </div>
+
+        <div class="eng-card" style="border-color:rgba(0,255,221,.4)">
+          <div class="eng-card-head">
+            <span class="eng-card-icon">✨</span>
+            <div>
+              <h4>Gemini Imagen</h4>
+              <div class="eng-tag">Google AI Studio · Gemini 2.0</div>
+            </div>
+          </div>
+          <ul>
+            <li>Natural language, tidak perlu format khusus</li>
+            <li>Buka <strong>Google AI Studio</strong> → Gemini 2.0 Flash</li>
+            <li>Atau gunakan <strong>ImageFX</strong> dari Google</li>
+            <li>Prompt lebih panjang lebih baik</li>
+            <li>Bagus untuk: Shopee, karakter Sanrio-inspired</li>
+            <li>Gratis di Google AI Studio (dengan limit)</li>
+            <li>Cocok jika tidak punya akses Midjourney</li>
+          </ul>
+        </div>
+
+        <div class="eng-card" style="border-color:rgba(255,110,199,.4)">
+          <div class="eng-card-head">
+            <span class="eng-card-icon">🇮🇩</span>
+            <div>
+              <h4>NB2 ID (Bahasa Indonesia)</h4>
+              <div class="eng-tag">Prompt terstruktur · Bahasa Indonesia</div>
+            </div>
+          </div>
+          <ul>
+            <li>Output prompt dalam <strong>Bahasa Indonesia</strong></li>
+            <li>Format terstruktur dengan seksi yang jelas</li>
+            <li>Cocok untuk tim/klien yang tidak fasih Inggris</li>
+            <li>Bisa paste ke AI lokal atau ChatGPT (DALL-E)</li>
+            <li>Terbaik untuk: Shopee, LINE, WhatsApp</li>
+            <li>Includ keyword SEO Bahasa Indonesia</li>
+          </ul>
+        </div>
+
+        <div class="eng-card" style="border-color:rgba(57,255,20,.4)">
+          <div class="eng-card-head">
+            <span class="eng-card-icon">🇬🇧</span>
+            <div>
+              <h4>EN Struct (English Structured)</h4>
+              <div class="eng-tag">Prompt terstruktur · English · SEO-ready</div>
+            </div>
+          </div>
+          <ul>
+            <li>Output prompt dalam <strong>Bahasa Inggris</strong> terstruktur</li>
+            <li>Sections: Category → Style → Format → Tech → Finish → Platform</li>
+            <li>Paling detail dan lengkap</li>
+            <li>Cocok untuk: Etsy, Redbubble, brief ke freelancer</li>
+            <li>Include negative prompt & platform specs</li>
+            <li>Terbaik untuk dokumentasi dan workflow tim</li>
+          </ul>
+        </div>
+
+        <div class="eng-card" style="border-color:rgba(0,200,173,.4)">
+          <div class="eng-card-head">
+            <span class="eng-card-icon">🌊</span>
+            <div>
+              <h4>Flow (Stable Diffusion)</h4>
+              <div class="eng-tag">ComfyUI / A1111 · LoRA · CFG scale</div>
+            </div>
+          </div>
+          <ul>
+            <li>Untuk pengguna <strong>Stable Diffusion</strong></li>
+            <li>Include CFG scale, steps, sampler recommendations</li>
+            <li>Bisa run lokal (gratis, unlimited)</li>
+            <li>Butuh GPU yang cukup kuat (min RTX 3060)</li>
+            <li>Cocok untuk: DTF, eksperimen, volume besar</li>
+            <li>Include negative prompt detail (NoStickerLoRA)</li>
+          </ul>
+        </div>
+
+        <div class="eng-card" style="border-color:rgba(255,122,0,.4)">
+          <div class="eng-card-head">
+            <span class="eng-card-icon">🦁</span>
+            <div>
+              <h4>Leonardo.ai</h4>
+              <div class="eng-tag">leonardo.ai · Anime Pastel Dream</div>
+            </div>
+          </div>
+          <ul>
+            <li>Platform AI image khusus kreator</li>
+            <li>Buka <strong>leonardo.ai</strong> → Image Generation</li>
+            <li>Pilih model: <strong>Anime Pastel Dream</strong> untuk kawaii</li>
+            <li>Include model recommendation di prompt output</li>
+            <li>Cocok untuk: kawaii, anime-style, illustrasi</li>
+            <li>Gratis 150 token/hari (cukup untuk ~15 gambar)</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="gm-sec-title">⚡ Pilih Engine Berdasarkan Budget & Akses</div>
+      <div class="gm-card">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:12px">
+          <div>
+            <h4 style="color:var(--gr);margin-bottom:6px">✅ Gratis</h4>
+            <ul style="padding-left:14px">
+              <li>Gemini (Google AI Studio)</li>
+              <li>Leonardo.ai (150 token/hari)</li>
+              <li>Stable Diffusion / Flow (lokal)</li>
+            </ul>
+          </div>
+          <div>
+            <h4 style="color:var(--ye);margin-bottom:6px">💰 Berbayar</h4>
+            <ul style="padding-left:14px">
+              <li>Midjourney ($10/bulan)</li>
+              <li>Leonardo.ai Pro</li>
+              <li>DALL-E 3 via ChatGPT Plus</li>
+            </ul>
+          </div>
+          <div>
+            <h4 style="color:var(--ac);margin-bottom:6px">⭐ Rekomendasi</h4>
+            <ul style="padding-left:14px">
+              <li><strong>Pemula:</strong> Gemini gratis</li>
+              <li><strong>Serius jual:</strong> Midjourney</li>
+              <li><strong>Volume besar:</strong> SD lokal</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TAB: PLATFORM & SPECS -->
+    <div class="gm-body" id="gm-platform">
+
+      <div class="gm-sec-title">📦 Spesifikasi Teknis Per Platform</div>
+
+      <div class="plat-grid">
+
+        <div class="plat-card" style="border-color:rgba(255,214,0,.4)">
+          <h4>🛍️ Etsy</h4>
+          <ul>
+            <li><strong>Format:</strong> PNG (fisik) / SVG (digital)</li>
+            <li><strong>Resolusi:</strong> min 300 DPI</li>
+            <li><strong>Ukuran:</strong> min 3000×3000px untuk single</li>
+            <li><strong>Background:</strong> transparan (PNG-24)</li>
+            <li><strong>Ukuran file:</strong> max 20MB per file</li>
+            <li><strong>Tips:</strong> upload 10+ listing foto preview</li>
+            <li><strong>Terbaik:</strong> die-cut, holographic, premium</li>
+          </ul>
+        </div>
+
+        <div class="plat-card" style="border-color:rgba(255,110,199,.4)">
+          <h4>🫧 Redbubble</h4>
+          <ul>
+            <li><strong>Format:</strong> PNG transparan</li>
+            <li><strong>Resolusi ideal:</strong> 7632×6480px @ 72 DPI</li>
+            <li><strong>Min:</strong> 1500×1200px</li>
+            <li><strong>Background:</strong> harus transparan</li>
+            <li><strong>Tips:</strong> upload resolusi max untuk print terbesar</li>
+            <li><strong>Print-on-demand:</strong> Redbubble cetak dan kirim</li>
+          </ul>
+        </div>
+
+        <div class="plat-card" style="border-color:rgba(255,122,0,.4)">
+          <h4>🛒 Shopee</h4>
+          <ul>
+            <li><strong>Format:</strong> JPG / PNG</li>
+            <li><strong>Resolusi:</strong> min 800×800px</li>
+            <li><strong>Rasio:</strong> 1:1 (square) untuk produk</li>
+            <li><strong>Ukuran file:</strong> max 2MB per foto</li>
+            <li><strong>Tips:</strong> buat mockup produk yang menarik</li>
+            <li><strong>Digital:</strong> upload ZIP berisi PNG files</li>
+          </ul>
+        </div>
+
+        <div class="plat-card" style="border-color:rgba(57,255,20,.4)">
+          <h4>💬 LINE Creator Market</h4>
+          <ul>
+            <li><strong>Format:</strong> PNG (transparan)</li>
+            <li><strong>Ukuran main:</strong> 370×320px max</li>
+            <li><strong>Tab icon:</strong> 96×74px</li>
+            <li><strong>Chat icon:</strong> 240×240px</li>
+            <li><strong>Max file:</strong> 1MB per stiker</li>
+            <li><strong>Jumlah:</strong> 8, 16, atau 24 stiker/set</li>
+            <li><strong>Proses review:</strong> 7-14 hari kerja LINE</li>
+          </ul>
+        </div>
+
+        <div class="plat-card" style="border-color:rgba(57,255,20,.4)">
+          <h4>📱 WhatsApp Sticker</h4>
+          <ul>
+            <li><strong>Format:</strong> WebP (wajib)</li>
+            <li><strong>Ukuran:</strong> 512×512px</li>
+            <li><strong>Max file:</strong> 100KB per stiker</li>
+            <li><strong>Jumlah:</strong> min 3, max 30 stiker/pack</li>
+            <li><strong>Tool:</strong> WhatsApp Sticker Studio app</li>
+            <li><strong>Tips:</strong> gunakan pngquant + cwebp untuk kompresi</li>
+          </ul>
+        </div>
+
+        <div class="plat-card" style="border-color:rgba(0,255,221,.4)">
+          <h4>👕 DTF (Direct to Film)</h4>
+          <ul>
+            <li><strong>Format:</strong> PNG atau TIFF</li>
+            <li><strong>Resolusi:</strong> min 150 DPI, ideal 300 DPI</li>
+            <li><strong>Mode warna:</strong> CMYK (konversi dari RGB)</li>
+            <li><strong>Ukuran:</strong> sesuai ukuran cetak (A3, A4)</li>
+            <li><strong>Background:</strong> putih atau transparan</li>
+            <li><strong>Tips:</strong> cek warna di layar vs cetak berbeda</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="gm-sec-title">🔄 Alur Kerja Produksi Stiker</div>
+      <div class="gm-card">
+        <h4 style="margin-bottom:12px">Dari prompt → siap jual (8 langkah)</h4>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:12px">
+          <div class="flow-row">
+            <div class="flow-item">1️⃣ Generate Prompt<br><span style="font-size:10px;color:var(--txt3)">tool ini</span></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-item">2️⃣ Buat di AI<br><span style="font-size:10px;color:var(--txt3)">MJ / Gemini / Flow</span></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-item">3️⃣ Pilih hasil terbaik<br><span style="font-size:10px;color:var(--txt3)">upscale U1-U4</span></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-item">4️⃣ Remove background<br><span style="font-size:10px;color:var(--txt3)">remove.bg / Canva</span></div>
+          </div>
+          <div class="flow-row">
+            <div class="flow-item">5️⃣ Tambah outline<br><span style="font-size:10px;color:var(--txt3)">Photoshop / Canva</span></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-item">6️⃣ Export PNG 300DPI<br><span style="font-size:10px;color:var(--txt3)">min 3000px</span></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-item">7️⃣ Buat mockup<br><span style="font-size:10px;color:var(--txt3)">placeit.net</span></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-item">8️⃣ Upload + SEO<br><span style="font-size:10px;color:var(--txt3)">tab SEO Panel</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gm-sec-title">💰 Estimasi Pendapatan per Platform</div>
+      <div class="gm-table-wrap">
+        <table class="combo-tbl">
+          <thead>
+            <tr><th>Platform</th><th>Harga Jual Rata-rata</th><th>Keuntungan/listing</th><th>Volume ideal</th><th>Kelebihan</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Etsy</strong></td>
+              <td>$3–$8 digital / $5–$15 fisik</td>
+              <td>~70% (digital) / ~40% (fisik)</td>
+              <td>50-200 listing</td>
+              <td>Pasar global, repeat buyer</td>
+            </tr>
+            <tr>
+              <td><strong>Redbubble</strong></td>
+              <td>$2–$5 (RB set margin)</td>
+              <td>20-30% margin</td>
+              <td>100+ design</td>
+              <td>Pasif total, RB yang print & kirim</td>
+            </tr>
+            <tr>
+              <td><strong>Shopee</strong></td>
+              <td>Rp5k–50k/lembar</td>
+              <td>~60% (digital) / ~30% (fisik)</td>
+              <td>20-100 produk</td>
+              <td>Pasar Indonesia, pembeli lokal</td>
+            </tr>
+            <tr>
+              <td><strong>LINE Creator</strong></td>
+              <td>$0.99–$1.99/set</td>
+              <td>35% dari harga jual</td>
+              <td>5-20 set</td>
+              <td>Royalti bulanan, fan base LINE</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+  </div><!-- /gm-box -->
+</div><!-- /gm-overlay -->
+</body>
+</html>
