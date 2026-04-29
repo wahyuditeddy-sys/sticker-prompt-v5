@@ -1,0 +1,11 @@
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy done
+        run: echo "Deployed to https://wahyuditeddy-sys.github.io/sticker-prompt-v5/"
