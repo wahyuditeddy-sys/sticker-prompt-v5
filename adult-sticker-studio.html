@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adult Sticker Studio — Prompt Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET & TOKENS ───────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f4f0;
+  --surface:#ffffff;
+  --surface2:#f0efe9;
+  --border:#e4e3dc;
+  --accent:#ff4d00;
+  --accent2:#ff7a3d;
+  --dark:#1a1a1a;
+  --mid:#555;
+  --muted:#888;
+  --green:#22c55e;
+  --blue:#3b82f6;
+  --purple:#8b5cf6;
+  --yellow:#f59e0b;
+  --font-head:'Syne',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --r:10px;
+  --r-sm:6px;
+  --shadow:0 2px 12px rgba(0,0,0,.07);
+  --shadow-lg:0 8px 32px rgba(0,0,0,.12);
+  --sidebar:288px;
+  --anim:.18s cubic-bezier(.4,0,.2,1);
+}
+
+body{font-family:var(--font-body);background:var(--bg);color:var(--dark);min-height:100vh;font-size:14px;line-height:1.5}
+
+/* ─── SCROLLBAR ────────────────────────────────────────────── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#ccc;border-radius:99px}
+
+/* ─── LAYOUT ───────────────────────────────────────────────── */
+#app{display:grid;grid-template-rows:auto 1fr;min-height:100vh}
+
+/* HEADER */
+#topbar{
+  background:var(--dark);
+  color:#fff;
+  padding:0 24px;
+  height:52px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  position:sticky;top:0;z-index:100;
+  border-bottom:2px solid var(--accent);
+}
+.tb-logo{font-family:var(--font-head);font-weight:800;font-size:17px;letter-spacing:-.3px}
+.tb-logo span{color:var(--accent)}
+.tb-badge{font-size:10px;font-weight:700;background:var(--accent);color:#fff;padding:2px 7px;border-radius:99px;letter-spacing:.5px;text-transform:uppercase}
+.tb-sep{flex:1}
+.tb-btn{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:var(--r-sm);font-family:var(--font-body);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:var(--anim)}
+.tb-btn-ghost{background:rgba(255,255,255,.08);color:#fff}
+.tb-btn-ghost:hover{background:rgba(255,255,255,.15)}
+.tb-btn-acc{background:var(--accent);color:#fff}
+.tb-btn-acc:hover{background:var(--accent2)}
+.tb-stat{font-size:12px;color:rgba(255,255,255,.5);font-family:var(--font-mono)}
+.tb-stat strong{color:#fff}
+
+/* MAIN BODY */
+#main{display:grid;grid-template-columns:var(--sidebar) 1fr;height:calc(100vh - 52px);overflow:hidden}
+
+/* SIDEBAR */
+#sidebar{
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+.sb-section{padding:14px 14px 0}
+.sb-label{font-family:var(--font-head);font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.sb-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* SEARCH */
+.sb-search{position:relative;margin-bottom:10px}
+.sb-search input{width:100%;padding:8px 34px 8px 12px;border:1px solid var(--border);border-radius:var(--r-sm);font-family:var(--font-body);font-size:13px;background:var(--bg);outline:none;transition:var(--anim)}
+.sb-search input:focus{border-color:var(--accent);background:#fff}
+.sb-search .si{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:15px;pointer-events:none}
+
+/* FILTER TABS */
+.filter-row{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.ft{padding:4px 10px;border-radius:99px;border:1px solid var(--border);font-size:11px;font-weight:600;cursor:pointer;background:transparent;transition:var(--anim);white-space:nowrap}
+.ft:hover{border-color:var(--accent);color:var(--accent)}
+.ft.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+
+/* CATEGORY LIST */
+#catList{flex:1;overflow-y:auto;padding:0 8px 14px}
+.cat-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 10px;
+  border-radius:var(--r-sm);
+  cursor:pointer;
+  transition:var(--anim);
+  margin-bottom:2px;
+  border:1px solid transparent;
+}
+.cat-item:hover{background:var(--bg)}
+.cat-item.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+.cat-emoji{font-size:18px;width:26px;text-align:center;flex-shrink:0}
+.cat-info{flex:1;min-width:0}
+.cat-name{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cat-sub{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cat-item.active .cat-sub{color:rgba(255,255,255,.6)}
+.cat-score{flex-shrink:0}
+.score-bar{width:32px;height:4px;border-radius:99px;background:var(--border);overflow:hidden;margin-bottom:2px}
+.score-fill{height:100%;border-radius:99px;background:var(--accent)}
+.cat-item.active .score-bar{background:rgba(255,255,255,.2)}
+.cat-item.active .score-fill{background:rgba(255,255,255,.8)}
+.score-num{font-family:var(--font-mono);font-size:9px;color:var(--muted);text-align:right}
+.cat-item.active .score-num{color:rgba(255,255,255,.5)}
+
+/* CONTENT AREA */
+#content{overflow-y:auto;display:flex;flex-direction:column;gap:0}
+.c-pad{padding:20px 24px}
+
+/* HERO CARD */
+#heroCard{
+  background:linear-gradient(135deg,var(--dark) 0%,#2d2d2d 100%);
+  color:#fff;
+  padding:24px;
+  position:relative;
+  overflow:hidden;
+  flex-shrink:0;
+}
+#heroCard::before{
+  content:'';position:absolute;right:-40px;top:-40px;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,77,0,.3),transparent 70%);
+  pointer-events:none;
+}
+.hero-cat{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.hero-emoji{font-size:36px}
+.hero-cat-info{}
+.hero-tag{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:2px}
+.hero-name{font-family:var(--font-head);font-size:22px;font-weight:800;line-height:1.1}
+.hero-tagline{font-size:13px;color:rgba(255,255,255,.6);margin-bottom:14px;line-height:1.5}
+.hero-stats{display:flex;gap:16px;flex-wrap:wrap}
+.hero-stat{display:flex;flex-direction:column;gap:1px}
+.hero-stat-label{font-size:10px;color:rgba(255,255,255,.4);letter-spacing:.5px;text-transform:uppercase}
+.hero-stat-val{font-family:var(--font-mono);font-size:14px;font-weight:600;color:#fff}
+.hero-stat-val.hot{color:var(--accent)}
+.trend-ring{
+  position:absolute;right:24px;top:50%;transform:translateY(-50%);
+  width:64px;height:64px;
+  border-radius:50%;
+  background:conic-gradient(var(--accent) 0%, rgba(255,255,255,.1) 0%);
+  display:flex;align-items:center;justify-content:center;
+}
+.trend-inner{
+  width:48px;height:48px;border-radius:50%;
+  background:#1a1a1a;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.trend-pct{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--accent);line-height:1}
+.trend-lbl{font-size:8px;color:rgba(255,255,255,.4);letter-spacing:.5px}
+
+/* SECTION HEADERS */
+.sec-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.sec-title{font-family:var(--font-head);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.8px}
+.sec-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.sec-hint{font-size:11px;color:var(--muted);margin-left:auto}
+
+/* TYPE SELECTOR */
+#typeRow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:0}
+.type-card{
+  padding:12px 10px;border-radius:var(--r);border:2px solid var(--border);
+  text-align:center;cursor:pointer;transition:var(--anim);background:var(--surface);
+}
+.type-card:hover{border-color:var(--accent);background:#fff9f7}
+.type-card.active{border-color:var(--dark);background:var(--dark);color:#fff}
+.type-icon{font-size:22px;margin-bottom:4px}
+.type-label{font-weight:700;font-size:12px;line-height:1.2}
+.type-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.type-card.active .type-sub{color:rgba(255,255,255,.5)}
+
+/* STYLE PILLS */
+#styleRow{display:flex;gap:6px;flex-wrap:wrap}
+.sty-pill{
+  display:flex;align-items:center;gap:5px;
+  padding:6px 12px;border-radius:99px;
+  border:1.5px solid var(--border);
+  font-size:12px;font-weight:600;cursor:pointer;
+  background:var(--surface);transition:var(--anim);
+}
+.sty-pill:hover{border-color:var(--accent);color:var(--accent)}
+.sty-pill.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.sty-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ENGINE SELECTOR */
+#engRow{display:flex;gap:6px;flex-wrap:wrap}
+.eng-btn{
+  display:flex;align-items:center;gap:5px;
+  padding:6px 12px;border-radius:var(--r-sm);
+  border:1.5px solid var(--border);
+  font-family:var(--font-mono);font-size:11px;font-weight:600;
+  cursor:pointer;background:var(--surface);transition:var(--anim);
+  color:var(--mid);
+}
+.eng-btn:hover{border-color:var(--dark);color:var(--dark)}
+.eng-btn.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+.eng-dot{width:7px;height:7px;border-radius:50%}
+
+/* PLATFORM CHIPS */
+#platRow{display:flex;gap:6px;flex-wrap:wrap}
+.plat-chip{
+  display:flex;align-items:center;gap:5px;
+  padding:6px 12px;border-radius:var(--r-sm);
+  border:1.5px solid var(--border);
+  font-size:12px;font-weight:500;cursor:pointer;
+  background:var(--surface);transition:var(--anim);
+}
+.plat-chip:hover{border-color:var(--dark)}
+.plat-chip.active{border-color:var(--dark);background:var(--dark);color:#fff}
+.plat-chip .offline-warn{font-size:9px;color:var(--yellow);font-weight:700;letter-spacing:.5px;display:none}
+.plat-chip.active .offline-warn{display:block}
+
+/* QUOTE AREA */
+.quote-wrap{position:relative}
+#quoteInput{
+  width:100%;min-height:80px;
+  padding:12px 14px;
+  border:1.5px solid var(--border);border-radius:var(--r);
+  font-family:var(--font-body);font-size:13px;
+  background:var(--surface);outline:none;resize:vertical;
+  transition:var(--anim);line-height:1.5;color:var(--dark);
+}
+#quoteInput:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,77,0,.08)}
+#quoteInput::placeholder{color:#bbb}
+.quote-actions{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.q-sug-scroll{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-top:8px}
+.q-sug-scroll::-webkit-scrollbar{height:3px}
+.q-sug{
+  flex-shrink:0;padding:5px 10px;border-radius:99px;
+  border:1px solid var(--border);font-size:11px;cursor:pointer;
+  background:var(--surface);transition:var(--anim);white-space:nowrap;max-width:200px;
+  overflow:hidden;text-overflow:ellipsis;
+}
+.q-sug:hover{background:var(--dark);color:#fff;border-color:var(--dark)}
+.q-sug-label{font-size:10px;color:var(--muted);font-weight:600;margin-top:6px;flex-shrink:0;align-self:center}
+
+/* GENERATE BTN */
+#genBtn{
+  width:100%;padding:14px;border-radius:var(--r);
+  border:none;cursor:pointer;font-family:var(--font-head);
+  font-size:15px;font-weight:700;letter-spacing:.3px;
+  background:var(--accent);color:#fff;
+  transition:var(--anim);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  position:relative;overflow:hidden;
+}
+#genBtn::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transform:translateX(-100%);transition:.6s}
+#genBtn:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,77,0,.35)}
+#genBtn:hover::before{transform:translateX(100%)}
+#genBtn:active{transform:translateY(0)}
+#genBtn.loading{opacity:.7;pointer-events:none}
+
+/* OUTPUT TABS */
+.out-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--surface)}
+.out-tab{
+  padding:10px 18px;font-size:12px;font-weight:600;cursor:pointer;
+  border-bottom:2px solid transparent;transition:var(--anim);color:var(--muted);
+  background:transparent;border-top:none;border-left:none;border-right:none;
+  font-family:var(--font-body);
+}
+.out-tab:hover{color:var(--dark)}
+.out-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* OUTPUT PANELS */
+.out-panel{display:none;padding:16px}
+.out-panel.active{display:block}
+
+/* PROMPT OUTPUT */
+.prompt-out{
+  background:var(--bg);border-radius:var(--r);border:1px solid var(--border);
+  padding:16px;font-family:var(--font-mono);font-size:12px;line-height:1.7;
+  color:var(--dark);margin-bottom:10px;min-height:100px;
+  white-space:pre-wrap;word-break:break-word;
+}
+.prompt-out.empty{display:flex;align-items:center;justify-content:center;color:var(--muted);font-family:var(--font-body);font-style:italic}
+.offline-spec{
+  background:#fffbeb;border:1px solid #fde68a;border-radius:var(--r);
+  padding:12px 14px;margin-bottom:10px;display:none;
+}
+.offline-spec.show{display:block}
+.offline-spec-title{font-weight:700;font-size:11px;color:#92400e;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px}
+.offline-spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.osg-item{font-size:11px;color:#78350f}
+.osg-item strong{color:#92400e}
+
+.action-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.act-btn{display:flex;align-items:center;gap:4px;padding:7px 12px;border-radius:var(--r-sm);border:1px solid var(--border);font-size:12px;font-weight:500;cursor:pointer;background:var(--surface);transition:var(--anim);font-family:var(--font-body)}
+.act-btn:hover{background:var(--dark);color:#fff;border-color:var(--dark)}
+.act-btn.pri{background:var(--dark);color:#fff;border-color:var(--dark)}
+.act-btn.pri:hover{background:#333}
+
+/* VARIATIONS PANEL */
+.var-grid{display:grid;gap:10px}
+.var-item{
+  background:var(--bg);border-radius:var(--r);border:1px solid var(--border);
+  padding:12px;cursor:pointer;transition:var(--anim);
+}
+.var-item:hover{border-color:var(--accent);background:#fff}
+.var-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.var-num{font-family:var(--font-mono);font-size:10px;font-weight:600;
+  background:var(--dark);color:#fff;padding:2px 7px;border-radius:99px}
+.var-angle{font-size:12px;font-weight:600;color:var(--mid)}
+.var-text{font-family:var(--font-mono);font-size:11px;color:var(--dark);line-height:1.6;word-break:break-word}
+.var-copy{float:right;font-size:10px;color:var(--muted);font-weight:600;cursor:pointer}
+.var-copy:hover{color:var(--accent)}
+
+/* SEO PANEL */
+.seo-group{margin-bottom:14px}
+.seo-group-title{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}
+.seo-tags{display:flex;gap:4px;flex-wrap:wrap}
+.seo-tag{padding:3px 9px;border-radius:99px;font-size:11px;border:1px solid var(--border);background:var(--surface);cursor:pointer;transition:var(--anim)}
+.seo-tag:hover{background:var(--dark);color:#fff}
+.seo-meta{font-family:var(--font-mono);font-size:11px;color:var(--mid);background:var(--bg);padding:10px;border-radius:var(--r-sm);margin-bottom:8px;line-height:1.6;word-break:break-all}
+
+/* TIPS PANEL */
+.tip-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.tip-item:last-child{border-bottom:none}
+.tip-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.tip-body{}
+.tip-title{font-weight:700;font-size:12px;margin-bottom:2px}
+.tip-desc{font-size:12px;color:var(--mid);line-height:1.5}
+.tip-code{font-family:var(--font-mono);font-size:11px;background:var(--bg);padding:6px 10px;border-radius:var(--r-sm);margin-top:4px;border:1px solid var(--border);color:var(--dark)}
+
+/* EMPTY STATE */
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:48px 24px;color:var(--muted);text-align:center;gap:10px;
+}
+.empty-state .es-icon{font-size:48px;opacity:.4}
+.empty-state .es-title{font-family:var(--font-head);font-size:16px;font-weight:700;color:var(--dark);opacity:.5}
+.empty-state .es-sub{font-size:13px;line-height:1.5;max-width:240px}
+
+/* CARD WRAPPER */
+.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;margin-bottom:1px}
+.card-body{padding:14px 16px}
+
+/* TOAST */
+#toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);
+  background:var(--dark);color:#fff;padding:10px 20px;border-radius:var(--r-sm);
+  font-size:13px;font-weight:500;z-index:9999;transition:.3s;pointer-events:none;
+  white-space:nowrap;box-shadow:var(--shadow-lg);
+}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:0}
+
+/* GUIDE MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--surface);border-radius:12px;width:min(680px,95vw);max-height:85vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow-lg)}
+.modal-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.modal-title{font-family:var(--font-head);font-size:18px;font-weight:800;flex:1}
+.modal-close{width:32px;height:32px;border-radius:50%;border:none;background:var(--bg);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:var(--anim)}
+.modal-close:hover{background:var(--dark);color:#fff}
+.modal-tabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto}
+.modal-tab{padding:12px 20px;font-size:13px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:var(--anim);background:none;border-top:none;border-left:none;border-right:none;font-family:var(--font-body);color:var(--muted)}
+.modal-tab:hover{color:var(--dark)}
+.modal-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.modal-body{padding:20px 24px;overflow-y:auto;flex:1}
+.guide-section{margin-bottom:20px}
+.guide-h{font-family:var(--font-head);font-size:15px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.guide-p{font-size:13px;color:var(--mid);line-height:1.6;margin-bottom:8px}
+.guide-steps{display:flex;flex-direction:column;gap:6px}
+.guide-step{display:flex;gap:10px;align-items:flex-start;padding:8px 12px;background:var(--bg);border-radius:var(--r-sm)}
+.guide-step-num{width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.guide-step-text{font-size:12px;color:var(--dark);line-height:1.5}
+.combo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.combo-card{padding:10px;background:var(--bg);border-radius:var(--r-sm);border-left:3px solid var(--accent)}
+.combo-title{font-weight:700;font-size:12px;margin-bottom:4px}
+.combo-desc{font-size:11px;color:var(--mid);line-height:1.4}
+.plat-guide-grid{display:grid;gap:6px}
+.plat-guide-item{display:flex;gap:10px;padding:8px 12px;border-radius:var(--r-sm);border:1px solid var(--border)}
+.plat-guide-name{font-weight:700;font-size:12px;width:80px;flex-shrink:0}
+.plat-guide-desc{font-size:11px;color:var(--mid);line-height:1.4}
+.plat-guide-spec{font-family:var(--font-mono);font-size:10px;color:var(--accent);margin-top:2px}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  #main{grid-template-columns:220px 1fr}
+  :root{--sidebar:220px}
+}
+@media(max-width:640px){
+  #main{grid-template-columns:1fr}
+  #sidebar{display:none}
+  .combo-grid{grid-template-columns:1fr}
+}
+
+/* LOADING SPINNER */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* PULSE ANIMATION */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.pulse{animation:pulse 1.5s ease-in-out infinite}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ── TOP BAR ───────────────────────────────────────────────── -->
+<header id="topbar">
+  <div class="tb-logo">Adult<span>Sticker</span>Studio</div>
+  <div class="tb-badge">v1.0</div>
+  <div class="tb-stat">Niche: <strong id="tbNiche">—</strong></div>
+  <div class="tb-stat">Score: <strong id="tbScore" style="color:var(--accent)">—</strong></div>
+  <div class="tb-sep"></div>
+  <button class="tb-btn tb-btn-ghost" onclick="A.openGuide()">📖 Guide</button>
+  <button class="tb-btn tb-btn-ghost" onclick="A.exportJSON()">⬇ Export</button>
+</header>
+
+<!-- ── MAIN ──────────────────────────────────────────────────── -->
+<div id="main">
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar">
+    <div class="sb-section" style="padding-bottom:10px">
+      <div class="sb-label">15 Top Niches</div>
+      <div class="sb-search">
+        <input type="text" id="catSearch" placeholder="Search niche…" oninput="A.filterCats(this.value)">
+        <span class="si">🔍</span>
+      </div>
+      <div class="filter-row">
+        <button class="ft active" data-f="all" onclick="A.setFilter('all',this)">All</button>
+        <button class="ft" data-f="viral" onclick="A.setFilter('viral',this)">🔥 Viral</button>
+        <button class="ft" data-f="work" onclick="A.setFilter('work',this)">💼 Work</button>
+        <button class="ft" data-f="life" onclick="A.setFilter('life',this)">💛 Life</button>
+        <button class="ft" data-f="hobby" onclick="A.setFilter('hobby',this)">🎮 Hobby</button>
+      </div>
+    </div>
+    <div id="catList"></div>
+  </aside>
+
+  <!-- CONTENT -->
+  <div id="content">
+
+    <!-- HERO -->
+    <div id="heroCard">
+      <div class="hero-cat">
+        <div class="hero-emoji" id="hEmoji">🎯</div>
+        <div class="hero-cat-info">
+          <div class="hero-tag" id="hTag">Select a niche</div>
+          <div class="hero-name" id="hName">Adult Sticker Studio</div>
+        </div>
+      </div>
+      <div class="hero-tagline" id="hTagline">Pick a trending niche from the sidebar to start generating sticker prompts.</div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="hero-stat-label">Audience</div><div class="hero-stat-val" id="hAud">—</div></div>
+        <div class="hero-stat"><div class="hero-stat-label">Platform Fit</div><div class="hero-stat-val" id="hPlat">—</div></div>
+        <div class="hero-stat"><div class="hero-stat-label">Trend Score</div><div class="hero-stat-val hot" id="hScore">—</div></div>
+      </div>
+      <div class="trend-ring" id="trendRing" style="display:none">
+        <div class="trend-inner">
+          <div class="trend-pct" id="trendPct">—</div>
+          <div class="trend-lbl">TREND</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIGURATOR -->
+    <div class="c-pad" style="display:flex;flex-direction:column;gap:12px">
+
+      <!-- TYPE -->
+      <div class="card">
+        <div class="card-body">
+          <div class="sec-head">
+            <div class="sec-dot"></div>
+            <div class="sec-title">Sticker Type</div>
+          </div>
+          <div id="typeRow">
+            <div class="type-card active" data-type="char_quote" onclick="A.setType('char_quote',this)">
+              <div class="type-icon">🧑‍🎨</div>
+              <div class="type-label">Char + Quote</div>
+              <div class="type-sub">Character & text</div>
+            </div>
+            <div class="type-card" data-type="typography" onclick="A.setType('typography',this)">
+              <div class="type-icon">✍️</div>
+              <div class="type-label">Typography</div>
+              <div class="type-sub">Text only</div>
+            </div>
+            <div class="type-card" data-type="char_only" onclick="A.setType('char_only',this)">
+              <div class="type-icon">🎭</div>
+              <div class="type-label">Char Only</div>
+              <div class="type-sub">No text</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ART STYLE -->
+      <div class="card">
+        <div class="card-body">
+          <div class="sec-head">
+            <div class="sec-dot"></div>
+            <div class="sec-title">Art Style</div>
+          </div>
+          <div id="styleRow"></div>
+        </div>
+      </div>
+
+      <!-- AI ENGINE -->
+      <div class="card">
+        <div class="card-body">
+          <div class="sec-head">
+            <div class="sec-dot"></div>
+            <div class="sec-title">AI Engine</div>
+            <div class="sec-hint">Multi-select = batch copy</div>
+          </div>
+          <div id="engRow"></div>
+        </div>
+      </div>
+
+      <!-- PLATFORM -->
+      <div class="card">
+        <div class="card-body">
+          <div class="sec-head">
+            <div class="sec-dot"></div>
+            <div class="sec-title">Platform</div>
+          </div>
+          <div id="platRow"></div>
+        </div>
+      </div>
+
+      <!-- QUOTE/TEXT -->
+      <div class="card">
+        <div class="card-body">
+          <div class="sec-head">
+            <div class="sec-dot"></div>
+            <div class="sec-title">Quote / Text (optional)</div>
+            <div class="sec-hint" id="quoteLimitHint">0/120</div>
+          </div>
+          <div class="quote-wrap">
+            <textarea id="quoteInput" placeholder="Type your quote or pick a suggestion below…" oninput="A.onQuoteInput(this)"></textarea>
+          </div>
+          <div id="qSugRow" style="display:flex;align-items:center;gap:0">
+            <div class="q-sug-label">Suggestions:</div>
+            <div class="q-sug-scroll" id="qSugList"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GENERATE -->
+      <button id="genBtn" onclick="A.generate()">
+        <span id="genBtnIcon">⚡</span>
+        <span id="genBtnText">Generate Prompt</span>
+      </button>
+
+    </div><!-- /c-pad -->
+
+    <!-- OUTPUT -->
+    <div class="card" style="margin:0 24px 24px;border-radius:var(--r)">
+      <div class="out-tabs">
+        <button class="out-tab active" data-tab="prompt" onclick="A.setTab('prompt',this)">📄 Prompt</button>
+        <button class="out-tab" data-tab="vars" onclick="A.setTab('vars',this)">🔄 Variations</button>
+        <button class="out-tab" data-tab="seo" onclick="A.setTab('seo',this)">🏷 SEO Tags</button>
+        <button class="out-tab" data-tab="tips" onclick="A.setTab('tips',this)">💡 Tips</button>
+      </div>
+
+      <!-- PROMPT TAB -->
+      <div class="out-panel active" id="panel-prompt">
+        <div class="action-row" id="promptActions" style="display:none">
+          <button class="act-btn pri" onclick="A.copyText('main')">📋 Copy Prompt</button>
+          <button class="act-btn" onclick="A.copyAll()">📦 Copy All Engines</button>
+          <button class="act-btn" onclick="A.generate()">🔄 Regenerate</button>
+        </div>
+        <div class="offline-spec" id="offlineSpec">
+          <div class="offline-spec-title">📦 Offline / Print Specs</div>
+          <div class="offline-spec-grid">
+            <div class="osg-item"><strong>Mode:</strong> CMYK</div>
+            <div class="osg-item"><strong>Resolution:</strong> 300 DPI</div>
+            <div class="osg-item"><strong>Bleed:</strong> 3mm all sides</div>
+            <div class="osg-item"><strong>Safe zone:</strong> 2mm inset</div>
+            <div class="osg-item"><strong>Format:</strong> AI / PDF / TIFF</div>
+            <div class="osg-item"><strong>Color profile:</strong> ISO Coated v2</div>
+          </div>
+        </div>
+        <div class="prompt-out empty" id="promptOut">← Select a niche and click Generate</div>
+      </div>
+
+      <!-- VARS TAB -->
+      <div class="out-panel" id="panel-vars">
+        <div class="var-grid" id="varGrid">
+          <div class="empty-state">
+            <div class="es-icon">🔄</div>
+            <div class="es-title">No Variations Yet</div>
+            <div class="es-sub">Generate a prompt first, then switch here for 5 angle variations.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEO TAB -->
+      <div class="out-panel" id="panel-seo">
+        <div id="seoPanel">
+          <div class="empty-state">
+            <div class="es-icon">🏷</div>
+            <div class="es-title">SEO Tags</div>
+            <div class="es-sub">Generate a prompt to get optimized Etsy/Redbubble tags.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TIPS TAB -->
+      <div class="out-panel" id="panel-tips">
+        <div id="tipsPanel">
+          <div class="empty-state">
+            <div class="es-icon">💡</div>
+            <div class="es-title">Pro Tips</div>
+            <div class="es-sub">Select a niche to see platform-specific selling tips.</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /output card -->
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- GUIDE MODAL -->
+<div class="modal-overlay" id="guideModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div style="font-size:24px">📖</div>
+      <div class="modal-title">How to Use Adult Sticker Studio</div>
+      <button class="modal-close" onclick="A.closeGuide()">✕</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" onclick="A.gmTab('g-start',this)">Quick Start</button>
+      <button class="modal-tab" onclick="A.gmTab('g-combo',this)">Combinations</button>
+      <button class="modal-tab" onclick="A.gmTab('g-plat',this)">Platforms</button>
+      <button class="modal-tab" onclick="A.gmTab('g-tips',this)">Pro Tips</button>
+    </div>
+    <div class="modal-body">
+
+      <div id="g-start">
+        <div class="guide-section">
+          <div class="guide-h">🚀 Quick Start (5 steps)</div>
+          <div class="guide-steps">
+            <div class="guide-step"><div class="guide-step-num">1</div><div class="guide-step-text"><strong>Pick a Niche</strong> — Choose from 15 trending niches in the sidebar. Click 🔥 Viral for highest demand.</div></div>
+            <div class="guide-step"><div class="guide-step-num">2</div><div class="guide-step-text"><strong>Select Sticker Type</strong> — Char+Quote (most versatile), Typography (text art), or Char Only (no text).</div></div>
+            <div class="guide-step"><div class="guide-step-num">3</div><div class="guide-step-text"><strong>Choose Art Style</strong> — Pick one style that matches your niche. Bold Flat = safe & universal.</div></div>
+            <div class="guide-step"><div class="guide-step-num">4</div><div class="guide-step-text"><strong>Select Platform</strong> — Where will you sell? Each platform has different prompt emphasis.</div></div>
+            <div class="guide-step"><div class="guide-step-num">5</div><div class="guide-step-text"><strong>Generate & Copy</strong> — Add your quote (or use suggestions), click ⚡ Generate, then copy to your AI tool.</div></div>
+          </div>
+        </div>
+        <div class="guide-section">
+          <div class="guide-h">🎯 What Each Tab Does</div>
+          <div class="guide-p">📄 <strong>Prompt</strong> — The main AI prompt ready to paste into Midjourney, Gemini, etc.<br>🔄 <strong>Variations</strong> — 5 angle variants of your prompt to A/B test designs.<br>🏷 <strong>SEO Tags</strong> — Copy-paste tags for Etsy, Redbubble, or Shopee listings.<br>💡 <strong>Tips</strong> — Platform-specific advice for selling your sticker niche.</div>
+        </div>
+      </div>
+
+      <div id="g-combo" style="display:none">
+        <div class="guide-section">
+          <div class="guide-h">🎨 Best Combinations by Goal</div>
+          <div class="combo-grid">
+            <div class="combo-card">
+              <div class="combo-title">🔥 Viral Etsy</div>
+              <div class="combo-desc">Work Humor + Char+Quote + Bold Flat + MidJourney + Etsy</div>
+            </div>
+            <div class="combo-card">
+              <div class="combo-title">📱 WhatsApp Sticker</div>
+              <div class="combo-desc">Empowerment + Typography + Minimal Line + Gemini + WhatsApp</div>
+            </div>
+            <div class="combo-card">
+              <div class="combo-title">🖨 Print/Offline</div>
+              <div class="combo-desc">Any niche + Char Only + Bold Flat + Stable Diffusion + Offline (CMYK spec auto-added)</div>
+            </div>
+            <div class="combo-card">
+              <div class="combo-title">👩‍⚕️ Niche Pro Pack</div>
+              <div class="combo-desc">Nurse/Medical + Char+Quote + Editorial + MidJourney + Redbubble</div>
+            </div>
+            <div class="combo-card">
+              <div class="combo-title">🎮 Gamer Bundle</div>
+              <div class="combo-desc">Gamer Adult + Char Only + Grunge + Stable Diffusion + Redbubble</div>
+            </div>
+            <div class="combo-card">
+              <div class="combo-title">✨ Self-Care Series</div>
+              <div class="combo-desc">Healing Era + Typography + Minimal Line + Gemini + Line + WhatsApp</div>
+            </div>
+          </div>
+        </div>
+        <div class="guide-section">
+          <div class="guide-h">⚙️ Multi-Engine Strategy</div>
+          <div class="guide-p">Select multiple engines before generating, then use <strong>Copy All Engines</strong> to get prompts formatted for each tool at once. Ideal for batch testing across platforms.</div>
+        </div>
+      </div>
+
+      <div id="g-plat" style="display:none">
+        <div class="guide-section">
+          <div class="guide-h">🌐 Platform Guide</div>
+          <div class="plat-guide-grid">
+            <div class="plat-guide-item">
+              <div>
+                <div class="plat-guide-name">🛍 Etsy</div>
+                <div class="plat-guide-desc">Best for US/EU market. PNG transparent background 300dpi. Emphasize uniqueness and handcrafted feel.</div>
+                <div class="plat-guide-spec">PNG 300dpi · Transparent BG · sRGB</div>
+              </div>
+            </div>
+            <div class="plat-guide-item">
+              <div>
+                <div class="plat-guide-name">🎨 Redbubble</div>
+                <div class="plat-guide-desc">POD (print-on-demand). Uploading white-BG stickers means white edges show — use transparent PNG.</div>
+                <div class="plat-guide-spec">PNG 300dpi · Transparent BG · 1500px+</div>
+              </div>
+            </div>
+            <div class="plat-guide-item">
+              <div>
+                <div class="plat-guide-name">🏪 Shopee</div>
+                <div class="plat-guide-desc">Southeast Asia market. Cheerful, relatable local content works best. Bahasa Indonesia captions.</div>
+                <div class="plat-guide-spec">PNG/JPG · 1:1 ratio · min 500×500</div>
+              </div>
+            </div>
+            <div class="plat-guide-item">
+              <div>
+                <div class="plat-guide-name">🖨 Offline/Print</div>
+                <div class="plat-guide-desc">Physical sticker printing. CMYK color mode required. 3mm bleed + safe zone. Prompt auto-adds specs.</div>
+                <div class="plat-guide-spec">CMYK · 300DPI · 3mm bleed · AI/PDF/TIFF</div>
+              </div>
+            </div>
+            <div class="plat-guide-item">
+              <div>
+                <div class="plat-guide-name">💚 LINE Sticker</div>
+                <div class="plat-guide-desc">LINE store (Japan/SE Asia). Must be transparent background, specific sizes. No adult content.</div>
+                <div class="plat-guide-spec">PNG 370×320px · Transparent · 8 or 16 set</div>
+              </div>
+            </div>
+            <div class="plat-guide-item">
+              <div>
+                <div class="plat-guide-name">💬 WhatsApp</div>
+                <div class="plat-guide-desc">Personal use / WASticker packs. WebP format, 512×512px. Transparent background essential.</div>
+                <div class="plat-guide-spec">WebP 512×512 · Transparent · &lt;100KB</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="g-tips" style="display:none">
+        <div class="guide-section">
+          <div class="guide-h">💡 Pro Selling Tips</div>
+          <div class="guide-steps">
+            <div class="guide-step"><div class="guide-step-num">💰</div><div class="guide-step-text">Bundle 10–20 related stickers as a "pack" — packs sell 3× better than singles on Etsy.</div></div>
+            <div class="guide-step"><div class="guide-step-num">🏷</div><div class="guide-step-text">Use all 13 Etsy tags. Include long-tail: "funny nurse sticker for water bottle" not just "nurse sticker".</div></div>
+            <div class="guide-step"><div class="guide-step-num">🔄</div><div class="guide-step-text">Use Variations tab to create 5 angles per niche — test which quote + style combo gets more clicks.</div></div>
+            <div class="guide-step"><div class="guide-step-num">📅</div><div class="guide-step-text">Seasonal niches (holidays, back-to-school) should be uploaded 6 weeks in advance for SEO to index.</div></div>
+            <div class="guide-step"><div class="guide-step-num">🎨</div><div class="guide-step-text">Generate in Bold Flat style first — it has the widest appeal and prints cleanly at small sizes.</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ────────────────────────────────────────────────────────────────────────────
+// DATA
+// ────────────────────────────────────────────────────────────────────────────
+const CATS = [
+  {
+    id:'work_humor', e:'😤', n:'Work Humor', score:97, cat:'work',
+    color:'#ff4d00',
+    tagline:'Office rage, meetings from hell, deadline survival humor',
+    audience:'Office workers, remote workers, 25–45',
+    platFit:'Etsy · Redbubble · Shopee',
+    core:'office worker character exhausted frustrated funny relatable humor, bold flat vector sticker, white clean background, thick outline, minimal details',
+    keywords:['work humor sticker','funny office sticker','meeting survivor','Monday meme sticker','WFH sticker'],
+    seoBase:'funny work sticker, office humor, coworker gift sticker, meeting survivor, corporate life',
+    quotes:[
+      '"I survived another meeting that could\'ve been an email"',
+      '"Deadline? More like dead inside"',
+      '"My coworker is my cardio — running away from them"',
+      '"Working from bed: pro mode activated"',
+      '"Not today, inbox"',
+    ],
+    tips:[
+      {icon:'💼',t:'Target gifters',d:'Many buyers gift these to coworkers. Mention "coworker gift" in your listing title.'},
+      {icon:'📅',t:'Peak seasons',d:'New Year (resolutions), first day back after holidays — upload sticker packs 3 weeks early.'},
+      {icon:'🎯',t:'Niche down',d:'Create sub-sets: WFH edition, manager jokes, IT department, marketing team humor.'},
+    ]
+  },
+  {
+    id:'empowerment', e:'✊', n:'Empowerment', score:96, cat:'life',
+    color:'#8b5cf6',
+    tagline:'Boss energy, confidence, self-worth affirmations',
+    audience:'Women 20–40, entrepreneurs, activists',
+    platFit:'Etsy · WhatsApp · Shopee',
+    core:'confident empowered woman character fist raised boss energy strong feminist bold flat vector sticker, white background, thick outline, vibrant colors',
+    keywords:['empowerment sticker','girl boss sticker','feminist sticker','strong woman','self love sticker'],
+    seoBase:'girl boss sticker, empowerment, feminist, strong woman, self love, confidence sticker',
+    quotes:[
+      '"She believed she could, so she did"',
+      '"Not your average girl"',
+      '"Main character energy"',
+      '"Soft but deadly"',
+      '"Built different"',
+    ],
+    tips:[
+      {icon:'💜',t:'Color matters',d:'Purple and gold palettes outperform other colors in this niche. High contrast = more clicks.'},
+      {icon:'📦',t:'Bundle strategy',d:'Create "Girl Boss Bundle" with 15–20 stickers. Higher AOV and perceived value.'},
+      {icon:'✍️',t:'Typography works too',d:'Pure text stickers with strong typography sell equally well in this niche.'},
+    ]
+  },
+  {
+    id:'adulting_humor', e:'🥲', n:'Adulting Humor', score:95, cat:'life',
+    color:'#f59e0b',
+    tagline:'Bills, responsibilities, adulthood disappointment',
+    audience:'Millennials & Gen Z 22–38',
+    platFit:'Etsy · WhatsApp · Redbubble',
+    core:'sad funny millennial adult character overwhelmed bills responsibilities exhausted humor bold flat vector sticker, white background, thick black outline',
+    keywords:['adulting sticker','funny adult sticker','millennial meme','adulting is hard','bills sticker'],
+    seoBase:'adulting is hard sticker, funny millennial sticker, adult humor, growing up sticker, funny sticker',
+    quotes:[
+      '"Adulting is just googling how to do things"',
+      '"Nobody told me adulthood was just being tired forever"',
+      '"Bills? I thought this was America"',
+      '"Send help (and snacks)"',
+      '"I peaked at 5 PM Friday"',
+    ],
+    tips:[
+      {icon:'😂',t:'Relatable wins',d:'The more universally relatable, the more organic shares you get. Test multiple quotes.'},
+      {icon:'🎁',t:'Birthday goldmine',d:'Many people gift these to friends turning 30. Target "30th birthday gift" keywords.'},
+      {icon:'📱',t:'WhatsApp packs',d:'Create 16-sticker WASticker packs around adulting theme — high download volume.'},
+    ]
+  },
+  {
+    id:'ai_humor', e:'🤖', n:'AI Humor', score:95, cat:'viral',
+    color:'#3b82f6',
+    tagline:'ChatGPT jokes, tech dependency, robot takeover humor',
+    audience:'Tech workers, students, Gen Z, 18–40',
+    platFit:'Etsy · Redbubble · Shopee',
+    core:'cute robot AI character funny tech humor bold flat vector sticker, digital aesthetic, white background, thick outline, clean minimal design',
+    keywords:['AI humor sticker','ChatGPT sticker','tech humor sticker','robot joke','coding humor sticker'],
+    seoBase:'AI humor sticker, ChatGPT sticker, tech funny sticker, robot sticker, programmer humor',
+    quotes:[
+      '"Powered by ChatGPT and anxiety"',
+      '"I asked AI to fix my life. It hallucinates."',
+      '"Not today, algorithm"',
+      '"404: social skills not found"',
+      '"Training data: mostly chaos"',
+    ],
+    tips:[
+      {icon:'📈',t:'Trending NOW',d:'This niche is at peak momentum. Upload as many variations as possible in the next 6 months.'},
+      {icon:'🤝',t:'Cross-sell',d:'Bundle with IT Coding niche for a tech humor mega-pack.'},
+      {icon:'🌍',t:'Global appeal',d:'English-language tech humor sells worldwide — not just local market.'},
+    ]
+  },
+  {
+    id:'nurse_medical', e:'🏥', n:'Nurse / Medical', score:94, cat:'work',
+    color:'#22c55e',
+    tagline:'Healthcare heroes, night shift survival, medical humor',
+    audience:'Nurses, doctors, medical students, 22–45',
+    platFit:'Etsy · Redbubble',
+    core:'cute nurse character scrubs uniform stethoscope friendly hero bold flat vector sticker, white background, thick outline, pastel medical colors',
+    keywords:['nurse sticker','medical humor sticker','nurse gift','RN sticker','healthcare worker sticker'],
+    seoBase:'nurse sticker, funny nurse gift, medical humor, RN sticker, healthcare worker, night shift nurse',
+    quotes:[
+      '"I\'m a nurse. What\'s your superpower?"',
+      '"Caffeine IV: nurse edition"',
+      '"Night shift nurse: runs on coffee and chaos"',
+      '"Not all heroes wear capes. Some wear scrubs."',
+      '"I work nights. Sleep is a myth."',
+    ],
+    tips:[
+      {icon:'🎁',t:'Gift market',d:'Nurse appreciation week (May) and Christmas are peak gifting seasons. Prepare 6 weeks early.'},
+      {icon:'👩‍⚕️',t:'Specialty niches',d:'Go deeper: ICU nurse, ER nurse, pediatric nurse, travel nurse — each is a separate micro-niche.'},
+      {icon:'💚',t:'Color code',d:'Teal/green + white palette dominates this niche. Buyers expect it.'},
+    ]
+  },
+  {
+    id:'grind_hustle', e:'💪', n:'Grind & Hustle', score:92, cat:'viral',
+    color:'#1a1a1a',
+    tagline:'Entrepreneurship, side hustle, no days off energy',
+    audience:'Entrepreneurs, freelancers, 20–40',
+    platFit:'Etsy · Shopee · Redbubble',
+    core:'determined entrepreneur hustler character grind hard work success ambition bold flat vector sticker, dark bold color, thick outline, energetic dynamic pose',
+    keywords:['hustle sticker','entrepreneur sticker','grind sticker','side hustle','no days off sticker'],
+    seoBase:'hustle culture sticker, entrepreneur sticker, grind mindset, side hustle, no days off, boss sticker',
+    quotes:[
+      '"Hustle hard, nap harder"',
+      '"Sleep when you\'re funded"',
+      '"No days off (except days I can\'t move)"',
+      '"Building the dream, one coffee at a time"',
+      '"Self-employed: my boss is an idiot"',
+    ],
+    tips:[
+      {icon:'🔥',t:'Pair with journals',d:'Buyers who purchase these often buy planners and journals — cross-promote in your shop.'},
+      {icon:'🏷',t:'Anti-hustle angle',d:'The "hustle culture is toxic" counter-trend is equally searchable. Create both sides.'},
+      {icon:'📦',t:'Bundle for gifting',d:'"New business owner gift set" — bundles sell well at Etsy for this niche.'},
+    ]
+  },
+  {
+    id:'it_coding', e:'💻', n:'IT & Coding', score:91, cat:'work',
+    color:'#10b981',
+    tagline:'Dev life, debugging tears, keyboard warriors',
+    audience:'Developers, IT engineers, CS students, 20–40',
+    platFit:'Etsy · Redbubble',
+    core:'programmer developer character computer keyboard coding frustrated funny bold flat vector sticker, dark tech aesthetic, white background, thick outline',
+    keywords:['programmer sticker','coding humor sticker','developer gift','IT nerd sticker','bug humor'],
+    seoBase:'programmer sticker, developer humor, coding sticker, software engineer gift, IT humor, bug sticker',
+    quotes:[
+      '"It works on my machine"',
+      '"Have you tried turning it off and on again?"',
+      '"Ctrl+Z my entire life please"',
+      '"99 bugs in the code, fix one, 127 bugs remain"',
+      '"git blame: it\'s always me"',
+    ],
+    tips:[
+      {icon:'🖥',t:'Use tech slang',d:'Quotes using actual coding terminology (git, debug, deploy) get 2× more engagement from devs.'},
+      {icon:'🎁',t:'Gift season',d:'Christmas, graduation, and "new job" occasions are top gifting moments for this niche.'},
+      {icon:'🖤',t:'Dark humor allowed',d:'This audience appreciates dry, cynical humor. Don\'t be afraid to go dark.'},
+    ]
+  },
+  {
+    id:'healing_era', e:'🌸', n:'Healing Era', score:91, cat:'life',
+    color:'#ec4899',
+    tagline:'Therapy, self-care, boundaries, emotional growth',
+    audience:'Women 22–38, therapy-goers, wellness community',
+    platFit:'Etsy · WhatsApp · LINE',
+    core:'soft aesthetic healing woman character peaceful self care gentle empowerment bold flat vector sticker, pastel pink tones, white background, clean outline, cozy mood',
+    keywords:['healing sticker','therapy sticker','self care sticker','boundaries sticker','mental wellness'],
+    seoBase:'healing era sticker, therapy sticker, self care, boundaries, emotional wellness, soft girl sticker',
+    quotes:[
+      '"I\'m in my healing era"',
+      '"Therapy is my cardio"',
+      '"No is a complete sentence"',
+      '"Protect your peace"',
+      '"Healing takes time and that\'s okay"',
+    ],
+    tips:[
+      {icon:'🌸',t:'Pastel palette',d:'Soft pinks, lavenders, and sage greens dominate. High saturation colors underperform here.'},
+      {icon:'💬',t:'WhatsApp gold',d:'This niche has massive WhatsApp sticker demand in Indonesia — localize quotes to Bahasa.'},
+      {icon:'🎁',t:'Self-gift buyers',d:'Many buyers purchase for themselves. "Treat yourself" messaging in listings converts well.'},
+    ]
+  },
+  {
+    id:'football', e:'⚽', n:'Football / Soccer', score:90, cat:'hobby',
+    color:'#16a34a',
+    tagline:'Match day energy, club passion, fan culture',
+    audience:'Football fans, 16–45, mostly male',
+    platFit:'Etsy · Shopee · Offline',
+    core:'football soccer player character dynamic action kick ball celebration fun bold flat vector sticker, white background, thick outline, sport energy',
+    keywords:['football sticker','soccer sticker','football fan gift','match day sticker','sport humor sticker'],
+    seoBase:'football sticker, soccer fan sticker, match day, sport humor, football gift, soccer player sticker',
+    quotes:[
+      '"My team\'s performance gives me anxiety"',
+      '"Football is not a matter of life and death — it\'s more important"',
+      '"Born to watch football, forced to work"',
+      '"Offside? In this house we don\'t talk about that"',
+      '"Match day > everything"',
+    ],
+    tips:[
+      {icon:'⚽',t:'Generic > team',d:'Avoid specific club names (IP issues). "Football fan" generics sell to everyone.'},
+      {icon:'🖨',t:'Print market huge',d:'Physical die-cut stickers for laptops/helmets. Offline print with this niche is profitable.'},
+      {icon:'🎉',t:'Tournament timing',d:'World Cup, Champions League, Euros — upload 2 months before tournament start.'},
+    ]
+  },
+  {
+    id:'mental_health', e:'🧠', n:'Mental Health', score:89, cat:'life',
+    color:'#a78bfa',
+    tagline:'Anxiety solidarity, depression humor, neurodivergent pride',
+    audience:'Gen Z & Millennials, 18–35, mental health advocates',
+    platFit:'Etsy · Redbubble · WhatsApp',
+    core:'relatable anxiety brain character cute expressive mental health awareness bold flat vector sticker, white background, thick outline, soft color palette, warm and comforting',
+    keywords:['mental health sticker','anxiety sticker','depression humor sticker','ADHD sticker','neurodivergent sticker'],
+    seoBase:'mental health awareness sticker, anxiety sticker, ADHD sticker, therapy humor, neurodivergent pride',
+    quotes:[
+      '"My anxiety has anxiety"',
+      '"ADHD: Always Doing Hyperfocus Differently"',
+      '"Functioning adult: loading…"',
+      '"Anxiety: the original life coach"',
+      '"I\'m fine. (I am not fine.)"',
+    ],
+    tips:[
+      {icon:'💜',t:'Sensitivity matters',d:'Balance humor with warmth. "Relatable solidarity" tone outperforms pure dark humor here.'},
+      {icon:'🧠',t:'ADHD is a hot niche',d:'ADHD stickers are currently the fastest growing sub-niche. Separate collection recommended.'},
+      {icon:'🌍',t:'Awareness events',d:'Mental Health Awareness Month (May) and World Mental Health Day (Oct 10) are peak traffic days.'},
+    ]
+  },
+  {
+    id:'astrology', e:'⭐', n:'Astrology', score:89, cat:'life',
+    color:'#7c3aed',
+    tagline:'Zodiac pride, cosmic vibes, Mercury retrograde drama',
+    audience:'Women 18–38, spirituality community',
+    platFit:'Etsy · Redbubble · LINE',
+    core:'zodiac astrology constellation star character cute mystical cosmic bold flat vector sticker, deep purple starfield, white background, thick gold outline, celestial aesthetic',
+    keywords:['astrology sticker','zodiac sticker','horoscope sticker','Mercury retrograde','Scorpio sticker'],
+    seoBase:'astrology sticker, zodiac gift, Mercury retrograde, star sign sticker, horoscope humor, celestial sticker',
+    quotes:[
+      '"Mercury retrograde made me do it"',
+      '"I\'m not dramatic, I\'m a Scorpio"',
+      '"My personality? It\'s in my birth chart"',
+      '"Manifesting since [birth year]"',
+      '"Blame it on the moon"',
+    ],
+    tips:[
+      {icon:'♓',t:'12× the listings',d:'Create zodiac-specific versions of your best designs × 12 signs = 12 separate listings.'},
+      {icon:'🌙',t:'Birthday season',d:'People search for their sign\'s stickers around their birthday month — plan accordingly.'},
+      {icon:'✨',t:'Gold foil aesthetic',d:'Designs mimicking gold foil print (yellow/gold on dark) get more saves on Etsy.'},
+    ]
+  },
+  {
+    id:'serotonin', e:'🌞', n:'Serotonin / Good Vibes', score:88, cat:'life',
+    color:'#f97316',
+    tagline:'Sunshine energy, wholesome humor, feel-good quotes',
+    audience:'Broad 18–45, mood boosters, gift buyers',
+    platFit:'Etsy · WhatsApp · LINE · Shopee',
+    core:'cheerful sunshine happy character wholesome positive energy cute kawaii bold flat vector sticker, bright warm colors, white background, thick outline, feel-good aesthetic',
+    keywords:['good vibes sticker','serotonin sticker','happy sticker','positive quote sticker','sunshine sticker'],
+    seoBase:'good vibes sticker, serotonin boost, happy sticker, positive energy, sunshine quote sticker, feel good',
+    quotes:[
+      '"Today\'s forecast: 100% chance of good vibes"',
+      '"You are the main character"',
+      '"Joy is free, collect it"',
+      '"Choose joy, especially on Mondays"',
+      '"Sunshine with a chance of overthinking"',
+    ],
+    tips:[
+      {icon:'🎁',t:'Universal gift',d:'This is the easiest niche to gift. Broad appeal means higher volume but more competition.'},
+      {icon:'🌈',t:'Color = click rate',d:'Bright yellow, coral, and teal combinations have the highest Etsy click-through rates.'},
+      {icon:'💬',t:'Best for WhatsApp',d:'Good vibes and sunshine designs get the most shares in WhatsApp/Telegram sticker packs.'},
+    ]
+  },
+  {
+    id:'sales_umkm', e:'🛒', n:'Sales & UMKM', score:87, cat:'work',
+    color:'#dc2626',
+    tagline:'Seller hustle, closing deals, customer service survival',
+    audience:'Small business owners, sellers, UMKM Indonesia, 20–45',
+    platFit:'Shopee · WhatsApp · Offline',
+    core:'small business owner seller character hustle shop entrepreneur cute fun bold flat vector sticker, white background, thick outline, warm business colors',
+    keywords:['UMKM sticker','penjual sticker','seller humor','jualan sticker','bisnis kecil sticker'],
+    seoBase:'UMKM sticker, penjual online, seller humor, bisnis kecil, jualan sticker, wirausaha sticker',
+    quotes:[
+      '"Satu pesanan lagi, baru tidur"',
+      '"Ongkir lebih mahal dari barangnya"',
+      '"Admin balas pesan: 24 jam nonstop"',
+      '"Closing deal hari ini ✓"',
+      '"Jualan dulu, burnout urusan nanti"',
+    ],
+    tips:[
+      {icon:'🇮🇩',t:'Local language wins',d:'Bahasa Indonesia quotes vastly outperform English for Shopee/WA Indonesia market.'},
+      {icon:'📦',t:'Packaging stickers',d:'Create "Thank you for your order" stickers — sellers buy these by the hundreds for packaging.'},
+      {icon:'🤝',t:'B2B opportunity',d:'Offer custom batch printing to local sellers — this is an offline print goldmine.'},
+    ]
+  },
+  {
+    id:'parenting', e:'👶', n:'Parenting', score:87, cat:'life',
+    color:'#0ea5e9',
+    tagline:'Parent exhaustion, toddler chaos, mom/dad humor',
+    audience:'Parents 25–40, mostly moms',
+    platFit:'Etsy · Redbubble · WhatsApp',
+    core:'exhausted funny parent character toddler chaos survival humor bold flat vector sticker, white background, thick outline, warm family colors, relatable expression',
+    keywords:['parenting sticker','mom humor sticker','dad joke sticker','toddler chaos','parent survival sticker'],
+    seoBase:'funny parenting sticker, mom humor, dad joke sticker, toddler chaos, parent gift, new parent sticker',
+    quotes:[
+      '"Sleep deprived but thriving (barely)"',
+      '"Motherhood: powered by coffee and chaos"',
+      '"Dad mode: activated (and confused)"',
+      '"My toddler is my cardio and my anxiety"',
+      '"Parenting is 90% improv"',
+    ],
+    tips:[
+      {icon:'🍼',t:'Gender split',d:'Make separate "Mom" and "Dad" versions — they get listed separately and doubled your inventory.'},
+      {icon:'🎁',t:'Baby shower',d:'Baby shower is a huge gifting occasion for this niche. Add "new parent gift" keywords.'},
+      {icon:'💙',t:'Milestone stickers',d:'"First month", "first steps" milestone stickers are an adjacent high-demand niche.'},
+    ]
+  },
+  {
+    id:'gamer_adult', e:'🎮', n:'Gamer (Adult)', score:86, cat:'hobby',
+    color:'#6d28d9',
+    tagline:'Gaming addiction humor, loot, raid night, respawn life',
+    audience:'Gamers 18–35, mostly male but growing female',
+    platFit:'Etsy · Redbubble · Offline',
+    core:'gamer character controller headset gaming setup funny bold flat vector sticker, dark game aesthetic, white background, thick neon outline, retro pixel energy',
+    keywords:['gamer sticker','gaming humor sticker','gamer gift','respawn sticker','loot sticker'],
+    seoBase:'gamer sticker, gaming humor, gamer gift, respawn sticker, controller sticker, gaming setup sticker',
+    quotes:[
+      '"One more game (5 hours later)"',
+      '"I don\'t have a problem, I have a respawn point"',
+      '"Adulting? I\'ll do it after this raid"',
+      '"GG (good grief)"',
+      '"My therapist is a save file"',
+    ],
+    tips:[
+      {icon:'🎮',t:'Avoid game logos',d:'Don\'t use specific game titles or logos (IP issues). "Gamer culture" generics are safe.'},
+      {icon:'🖤',t:'Dark color palette',d:'Black, dark purple, and neon green/blue dominate this niche aesthetic.'},
+      {icon:'🖨',t:'Laptop sticker',d:'Gamers stick stickers on laptops/controllers. Offline die-cut print is a strong sales channel.'},
+    ]
+  },
+];
+
+// ────────────────────────────────────────────────────────────────────────────
+const STYLES = [
+  {id:'bold_flat',  label:'Bold Flat',     dot:'#ff4d00', desc:'thick black outline, flat fill, minimal shading, vector sticker art, clean white background'},
+  {id:'vintage',   label:'Vintage',        dot:'#92400e', desc:'retro vintage style, worn texture, muted earthy tones, stamp aesthetic, faded ink look'},
+  {id:'minimal_line', label:'Minimal Line', dot:'#6b7280', desc:'minimal line art style, thin elegant strokes, negative space, monochrome or duotone'},
+  {id:'grunge',    label:'Grunge',         dot:'#374151', desc:'grunge textured style, distressed edges, rough ink, urban street art aesthetic'},
+  {id:'editorial', label:'Editorial',      dot:'#7c3aed', desc:'editorial fashion illustration style, bold typography integration, high contrast, sophisticated'},
+  {id:'flat_modern', label:'Flat Modern',  dot:'#0ea5e9', desc:'modern flat design, geometric shapes, clean gradient, contemporary illustration style'},
+];
+
+const ENGINES = [
+  {id:'mj',  label:'MidJourney', dot:'#00b4d8', suffix:'--ar 1:1 --v 6 --style raw --no text watermark blurry'},
+  {id:'gem', label:'Gemini',     dot:'#4285f4', suffix:'Generate as sticker design, transparent background, vector style, no text unless specified'},
+  {id:'sd',  label:'Stable Diff',dot:'#f97316', suffix:'(sticker), vector art, white background, high quality, detailed, trending on artstation'},
+  {id:'leo', label:'Leonardo',   dot:'#a855f7', suffix:'sticker design, vector illustration, clean background, professional quality, detailed artwork'},
+];
+
+const PLATFORMS = [
+  {id:'etsy',      label:'🛍 Etsy',     spec:'PNG 300dpi transparent background sRGB color profile'},
+  {id:'redbubble', label:'🎨 Redbubble', spec:'PNG 300dpi transparent background min 1500px'},
+  {id:'shopee',    label:'🏪 Shopee',    spec:'PNG/JPG 1:1 ratio min 500×500px'},
+  {id:'offline',   label:'🖨 Offline',   spec:'CMYK 300DPI 3mm bleed safe zone 2mm AI/PDF/TIFF format', offline:true},
+  {id:'line',      label:'💚 LINE',      spec:'PNG 370×320px transparent background 8 or 16 sticker set'},
+  {id:'whatsapp',  label:'💬 WhatsApp',  spec:'WebP 512×512px transparent background under 100KB'},
+];
+
+// ────────────────────────────────────────────────────────────────────────────
+// APP STATE
+// ────────────────────────────────────────────────────────────────────────────
+const A = {
+  cat: null,
+  type: 'char_quote',
+  style: 'bold_flat',
+  engines: ['mj'],
+  platforms: ['etsy'],
+  quote: '',
+  filter: 'all',
+  query: '',
+  activeTab: 'prompt',
+  lastPrompt: '',
+  lastVars: [],
+  lastSEO: null,
+
+  // ── INIT ──────────────────────────────────────────────────────────────────
+  init() {
+    this.renderStyleRow();
+    this.renderEngRow();
+    this.renderPlatRow();
+    this.renderCats();
+    this.setCat(CATS[0]);
+  },
+
+  // ── CATEGORY ─────────────────────────────────────────────────────────────
+  setCat(c) {
+    this.cat = c;
+    this.renderCats();
+    this.updateHero();
+    this.renderQuoteSuggestions();
+    this.resetOutput();
+  },
+
+  filterCats(q) {
+    this.query = q.toLowerCase();
+    this.renderCats();
+  },
+
+  setFilter(f, btn) {
+    this.filter = f;
+    this.query = '';
+    document.getElementById('catSearch').value = '';
+    document.querySelectorAll('.ft').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    this.renderCats();
+  },
+
+  renderCats() {
+    const f = this.filter, q = this.query;
+    let list = CATS.filter(c => {
+      const matchQ = !q || c.n.toLowerCase().includes(q) || c.keywords.some(k=>k.includes(q));
+      const matchF = f==='all' || c.cat===f;
+      return matchQ && matchF;
+    });
+    const el = document.getElementById('catList');
+    if (!list.length) {
+      el.innerHTML = '<div style="padding:24px 16px;text-align:center;color:var(--muted);font-size:12px">No results</div>';
+      return;
+    }
+    el.innerHTML = list.map(c => {
+      const act = this.cat && this.cat.id === c.id;
+      const pct = c.score;
+      return `<div class="cat-item${act?' active':''}" onclick="A.setCat(CATS.find(x=>x.id==='${c.id}'))">
+        <div class="cat-emoji">${c.e}</div>
+        <div class="cat-info">
+          <div class="cat-name">${c.n}</div>
+          <div class="cat-sub">${c.tagline.substring(0,42)}…</div>
+        </div>
+        <div class="cat-score">
+          <div class="score-bar"><div class="score-fill" style="width:${pct}%"></div></div>
+          <div class="score-num">${pct}%</div>
+        </div>
+      </div>`;
+    }).join('');
+  },
+
+  // ── HERO ─────────────────────────────────────────────────────────────────
+  updateHero() {
+    const c = this.cat;
+    if (!c) return;
+    document.getElementById('hEmoji').textContent = c.e;
+    document.getElementById('hTag').textContent = c.cat.toUpperCase() + ' NICHE';
+    document.getElementById('hName').textContent = c.n;
+    document.getElementById('hTagline').textContent = c.tagline;
+    document.getElementById('hAud').textContent = c.audience.split(',')[0];
+    document.getElementById('hPlat').textContent = c.platFit;
+    document.getElementById('hScore').textContent = c.score + '%';
+    document.getElementById('tbNiche').textContent = c.n;
+    document.getElementById('tbScore').textContent = c.score + '%';
+    // Trend ring
+    const ring = document.getElementById('trendRing');
+    const pct = document.getElementById('trendPct');
+    ring.style.display = 'flex';
+    ring.style.background = `conic-gradient(var(--accent) ${c.score}%, rgba(255,255,255,.1) 0%)`;
+    pct.textContent = c.score + '%';
+  },
+
+  // ── STYLE ─────────────────────────────────────────────────────────────────
+  renderStyleRow() {
+    document.getElementById('styleRow').innerHTML = STYLES.map(s =>
+      `<div class="sty-pill${s.id===this.style?' active':''}" onclick="A.setStyle('${s.id}',this)">
+        <div class="sty-dot" style="background:${s.dot}"></div>${s.label}
+      </div>`
+    ).join('');
+  },
+
+  setStyle(id, el) {
+    this.style = id;
+    document.querySelectorAll('.sty-pill').forEach(p=>p.classList.remove('active'));
+    if (el) el.classList.add('active');
+  },
+
+  // ── TYPE ─────────────────────────────────────────────────────────────────
+  setType(id, el) {
+    this.type = id;
+    document.querySelectorAll('.type-card').forEach(c=>c.classList.remove('active'));
+    if (el) el.classList.add('active');
+    // Show/hide quote input hint
+    const qi = document.getElementById('quoteInput');
+    if (id === 'char_only') {
+      qi.placeholder = 'Char Only mode: no text on sticker. Quote field is optional for concept description.';
+    } else if (id === 'typography') {
+      qi.placeholder = 'Required for Typography: enter your quote or text here…';
+    } else {
+      qi.placeholder = 'Type your quote or pick a suggestion below…';
+    }
+  },
+
+  // ── ENGINE ───────────────────────────────────────────────────────────────
+  renderEngRow() {
+    document.getElementById('engRow').innerHTML = ENGINES.map(e =>
+      `<button class="eng-btn${this.engines.includes(e.id)?' active':''}" onclick="A.toggleEng('${e.id}',this)">
+        <div class="eng-dot" style="background:${e.dot}"></div>${e.label}
+      </button>`
+    ).join('');
+  },
+
+  toggleEng(id, el) {
+    if (this.engines.includes(id)) {
+      if (this.engines.length === 1) { this.toast('At least one engine required'); return; }
+      this.engines = this.engines.filter(e=>e!==id);
+      el.classList.remove('active');
+    } else {
+      this.engines.push(id);
+      el.classList.add('active');
+    }
+  },
+
+  // ── PLATFORM ─────────────────────────────────────────────────────────────
+  renderPlatRow() {
+    document.getElementById('platRow').innerHTML = PLATFORMS.map(p =>
+      `<div class="plat-chip${this.platforms.includes(p.id)?' active':''}" onclick="A.togglePlat('${p.id}',this)">
+        ${p.label}${p.offline?'<span class="offline-warn">CMYK</span>':''}
+      </div>`
+    ).join('');
+  },
+
+  togglePlat(id, el) {
+    if (this.platforms.includes(id)) {
+      if (this.platforms.length === 1) { this.toast('At least one platform required'); return; }
+      this.platforms = this.platforms.filter(p=>p!==id);
+      el.classList.remove('active');
+    } else {
+      this.platforms.push(id);
+      el.classList.add('active');
+    }
+    // Show offline spec
+    const offSpec = document.getElementById('offlineSpec');
+    if (this.platforms.includes('offline')) offSpec.classList.add('show');
+    else offSpec.classList.remove('show');
+  },
+
+  // ── QUOTE ─────────────────────────────────────────────────────────────────
+  renderQuoteSuggestions() {
+    const c = this.cat;
+    if (!c) return;
+    const list = document.getElementById('qSugList');
+    list.innerHTML = c.quotes.map(q =>
+      `<div class="q-sug" onclick="A.applyQuote(this)" title="${this.escHtml(q)}">${this.escHtml(q)}</div>`
+    ).join('');
+  },
+
+  applyQuote(el) {
+    const q = el.getAttribute('title');
+    document.getElementById('quoteInput').value = q;
+    this.quote = q;
+    document.getElementById('quoteLimitHint').textContent = q.length + '/120';
+    this.toast('Quote applied ✓');
+  },
+
+  onQuoteInput(el) {
+    this.quote = el.value;
+    document.getElementById('quoteLimitHint').textContent = el.value.length + '/120';
+  },
+
+  // ── TAB ──────────────────────────────────────────────────────────────────
+  setTab(id, btn) {
+    this.activeTab = id;
+    document.querySelectorAll('.out-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.out-panel').forEach(p=>p.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    document.getElementById('panel-' + id).classList.add('active');
+  },
+
+  // ── GENERATE ─────────────────────────────────────────────────────────────
+  generate() {
+    if (!this.cat) { this.toast('Please select a niche first!'); return; }
+    const btn = document.getElementById('genBtn');
+    btn.classList.add('loading');
+    document.getElementById('genBtnIcon').innerHTML = '<span class="spinner"></span>';
+    document.getElementById('genBtnText').textContent = 'Generating…';
+
+    setTimeout(() => {
+      try {
+        this.lastPrompt = this.buildPrompt();
+        this.lastVars = this.generateVars();
+        this.lastSEO = this.buildSEO();
+
+        this.renderPromptOutput();
+        this.renderVarsPanel();
+        this.renderSEO();
+        this.renderTips();
+
+        // Switch to prompt tab
+        this.setTab('prompt', document.querySelector('[data-tab="prompt"]'));
+        document.getElementById('promptActions').style.display = 'flex';
+
+        // Offline spec
+        const offSpec = document.getElementById('offlineSpec');
+        if (this.platforms.includes('offline')) offSpec.classList.add('show');
+        else offSpec.classList.remove('show');
+
+        this.toast('Prompt generated! ✓');
+      } catch(e) {
+        this.toast('Error: ' + e.message);
+      }
+
+      btn.classList.remove('loading');
+      document.getElementById('genBtnIcon').textContent = '⚡';
+      document.getElementById('genBtnText').textContent = 'Generate Prompt';
+    }, 320);
+  },
+
+  buildPrompt(angleOverride, engineOverride) {
+    const c = this.cat;
+    const sty = STYLES.find(s=>s.id===this.style);
+    const eng = ENGINES.find(e=>e.id===(engineOverride||this.engines[0]));
+    const platSpecs = this.platforms.map(pid => {
+      const p = PLATFORMS.find(x=>x.id===pid);
+      return p ? p.spec : '';
+    }).filter(Boolean).join('; ');
+
+    let base = c.core;
+    const quote = (this.quote || '').trim();
+
+    // Type modifier
+    let typeMod = '';
+    if (this.type === 'char_quote') {
+      typeMod = quote
+        ? `with bold quote text: "${quote}"`
+        : 'with a short funny relatable quote on the sticker';
+    } else if (this.type === 'typography') {
+      typeMod = quote
+        ? `typography text art sticker, large bold text: "${quote}", decorative lettering`
+        : 'typography-only text art sticker, bold decorative lettering, no character illustration';
+    } else if (this.type === 'char_only') {
+      typeMod = 'character only illustration, NO text on sticker, expressive pose and facial expression';
+    }
+
+    const angleNote = angleOverride || '';
+    const offlineNote = this.platforms.includes('offline')
+      ? ', CMYK ready, 3mm bleed, print-ready vector' : '';
+
+    let prompt = `${base}, ${typeMod}, ${sty.desc}${offlineNote}${angleNote ? ', ' + angleNote : ''}`;
+
+    // Engine suffix
+    if (eng && eng.suffix) {
+      prompt += ' ' + eng.suffix;
+    }
+
+    // Platform spec note
+    if (platSpecs) {
+      prompt += `\n\n[Platform specs: ${platSpecs}]`;
+    }
+
+    return prompt.replace(/,\s*,/g, ',').replace(/\s+/g, ' ').trim();
+  },
+
+  generateVars() {
+    const angles = [
+      { label:'Dramatic / Emotional', mod:'exaggerated dramatic expression, big eyes, cinematic emotion' },
+      { label:'Minimal Cute', mod:'super cute minimalist chibi style, simplified features, adorable kawaii' },
+      { label:'Bold Statement', mod:'bold graphic impact, high contrast, poster-like composition' },
+      { label:'Ironic / Sarcastic', mod:'dry humor deadpan expression, subtle irony in pose and face' },
+      { label:'Energetic / Hype', mod:'dynamic energy burst, action lines, excited expressive character' },
+    ];
+    return angles.map((a, i) => ({
+      num: i + 1,
+      angle: a.label,
+      prompt: this.buildPrompt(a.mod)
+    }));
+  },
+
+  buildSEO() {
+    const c = this.cat;
+    const platTags = this.platforms.map(pid => {
+      const m = {etsy:'etsy sticker',redbubble:'redbubble sticker',shopee:'shopee sticker',offline:'print sticker',line:'line sticker',whatsapp:'whatsapp sticker'};
+      return m[pid]||'';
+    }).filter(Boolean);
+    const typeTags = {
+      char_quote:['character sticker','quote sticker','funny sticker'],
+      typography:['typography sticker','text sticker','lettering sticker'],
+      char_only:['character illustration sticker','art sticker'],
+    }[this.type] || [];
+
+    return {
+      mainTags: [...c.keywords, ...typeTags, ...platTags].slice(0, 13),
+      longTail: [
+        `${c.n.toLowerCase()} sticker for water bottle`,
+        `funny ${c.n.toLowerCase()} gift sticker`,
+        `${c.n.toLowerCase()} laptop sticker`,
+        `cute ${c.n.toLowerCase()} sticker pack`,
+      ],
+      title: `${c.n} Sticker | ${c.keywords[0] || 'Funny Sticker'} | Digital Download`,
+      desc: `${c.tagline}. Perfect for ${c.platFit}. ${c.seoBase}.`,
+    };
+  },
+
+  // ── RENDER OUTPUT ─────────────────────────────────────────────────────────
+  renderPromptOutput() {
+    const el = document.getElementById('promptOut');
+    el.classList.remove('empty');
+    el.textContent = this.lastPrompt;
+  },
+
+  renderVarsPanel() {
+    const g = document.getElementById('varGrid');
+    if (!this.lastVars.length) return;
+    g.innerHTML = this.lastVars.map(v => `
+      <div class="var-item" onclick="A.copyVarText(${v.num})">
+        <div class="var-head">
+          <div class="var-num">#${v.num}</div>
+          <div class="var-angle">${v.angle}</div>
+          <div class="var-copy" onclick="event.stopPropagation();A.copyVarText(${v.num})">Copy ↗</div>
+        </div>
+        <div class="var-text" id="var-text-${v.num}">${this.escHtml(v.prompt)}</div>
+      </div>
+    `).join('');
+  },
+
+  copyVarText(num) {
+    const v = this.lastVars.find(x=>x.num===num);
+    if (v) {
+      navigator.clipboard.writeText(v.prompt).then(() => this.toast(`Variation #${num} copied!`));
+    }
+  },
+
+  renderSEO() {
+    const s = this.lastSEO;
+    if (!s) return;
+    const p = document.getElementById('seoPanel');
+    p.innerHTML = `
+      <div class="seo-group">
+        <div class="seo-group-title">📋 Listing Title</div>
+        <div class="seo-meta">${this.escHtml(s.title)}</div>
+        <button class="act-btn" style="margin-bottom:12px" onclick="navigator.clipboard.writeText('${this.escHtml(s.title)}').then(()=>A.toast('Title copied!'))">Copy Title</button>
+      </div>
+      <div class="seo-group">
+        <div class="seo-group-title">🏷 Main Tags (${s.mainTags.length}/13)</div>
+        <div class="seo-tags">${s.mainTags.map(t=>`<div class="seo-tag" onclick="navigator.clipboard.writeText('${this.escHtml(t)}').then(()=>A.toast('Tag copied!'))">${this.escHtml(t)}</div>`).join('')}</div>
+      </div>
+      <div class="seo-group" style="margin-top:12px">
+        <div class="seo-group-title">🔍 Long-Tail Keywords</div>
+        <div class="seo-tags">${s.longTail.map(t=>`<div class="seo-tag" onclick="navigator.clipboard.writeText('${this.escHtml(t)}').then(()=>A.toast('Keyword copied!'))">${this.escHtml(t)}</div>`).join('')}</div>
+      </div>
+      <div class="seo-group" style="margin-top:12px">
+        <div class="seo-group-title">📝 Description Seed</div>
+        <div class="seo-meta">${this.escHtml(s.desc)}</div>
+      </div>
+      <button class="act-btn pri" onclick="A.copyAllSEO()">📋 Copy All Tags</button>
+    `;
+  },
+
+  copyAllSEO() {
+    if (!this.lastSEO) return;
+    const all = [...this.lastSEO.mainTags, ...this.lastSEO.longTail].join(', ');
+    navigator.clipboard.writeText(all).then(() => this.toast('All SEO tags copied!'));
+  },
+
+  renderTips() {
+    const c = this.cat;
+    if (!c || !c.tips) return;
+    const p = document.getElementById('tipsPanel');
+    p.innerHTML = `<div>${c.tips.map(t=>`
+      <div class="tip-item">
+        <div class="tip-icon">${t.icon}</div>
+        <div class="tip-body">
+          <div class="tip-title">${t.t}</div>
+          <div class="tip-desc">${t.d}</div>
+        </div>
+      </div>`).join('')}</div>
+      <div style="margin-top:14px;padding:12px;background:var(--bg);border-radius:var(--r-sm);border:1px solid var(--border)">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Recommended Platforms</div>
+        <div style="font-size:13px;color:var(--dark)">${c.platFit}</div>
+      </div>`;
+  },
+
+  resetOutput() {
+    this.lastPrompt = '';
+    this.lastVars = [];
+    this.lastSEO = null;
+    document.getElementById('promptOut').classList.add('empty');
+    document.getElementById('promptOut').textContent = '← Click ⚡ Generate to create prompt';
+    document.getElementById('promptActions').style.display = 'none';
+    document.getElementById('varGrid').innerHTML = `<div class="empty-state"><div class="es-icon">🔄</div><div class="es-title">No Variations Yet</div><div class="es-sub">Generate a prompt first.</div></div>`;
+    document.getElementById('seoPanel').innerHTML = `<div class="empty-state"><div class="es-icon">🏷</div><div class="es-title">SEO Tags</div><div class="es-sub">Generate a prompt to get optimized tags.</div></div>`;
+  },
+
+  // ── COPY ─────────────────────────────────────────────────────────────────
+  copyText(mode) {
+    if (mode === 'main' && this.lastPrompt) {
+      navigator.clipboard.writeText(this.lastPrompt).then(() => this.toast('Prompt copied! ✓'));
+    }
+  },
+
+  copyAll() {
+    if (!this.lastPrompt || !this.cat) { this.toast('Generate a prompt first!'); return; }
+    const parts = this.engines.map(eid => {
+      const eng = ENGINES.find(e=>e.id===eid);
+      const p = this.buildPrompt(null, eid);
+      return `=== ${eng.label.toUpperCase()} ===\n${p}`;
+    }).join('\n\n');
+    navigator.clipboard.writeText(parts).then(() => this.toast('All engine prompts copied! ✓'));
+  },
+
+  exportJSON() {
+    if (!this.cat) { this.toast('Select a niche first!'); return; }
+    const data = {
+      niche: this.cat.n,
+      score: this.cat.score,
+      type: this.type,
+      style: this.style,
+      engines: this.engines,
+      platforms: this.platforms,
+      quote: this.quote,
+      prompt: this.lastPrompt,
+      variations: this.lastVars,
+      seo: this.lastSEO,
+      generated: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sticker-prompt-${this.cat.id}-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    this.toast('Exported! ✓');
+  },
+
+  // ── GUIDE MODAL ──────────────────────────────────────────────────────────
+  openGuide() {
+    document.getElementById('guideModal').classList.add('open');
+  },
+
+  closeGuide() {
+    document.getElementById('guideModal').classList.remove('open');
+  },
+
+  gmTab(id, btn) {
+    document.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
+    ['g-start','g-combo','g-plat','g-tips'].forEach(s=>{
+      document.getElementById(s).style.display='none';
+    });
+    if (btn) btn.classList.add('active');
+    document.getElementById(id).style.display = 'block';
+  },
+
+  // ── UTILS ─────────────────────────────────────────────────────────────────
+  escHtml(s) {
+    return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  },
+
+  toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  },
+};
+
+// Close modal on overlay click
+document.getElementById('guideModal').addEventListener('click', function(e) {
+  if (e.target === this) A.closeGuide();
+});
+
+// Init
+A.init();
+</script>
+</body>
+</html>
