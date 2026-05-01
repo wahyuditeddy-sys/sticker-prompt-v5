@@ -55,6 +55,10 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--dark);min-hei
 .tb-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:var(--r-sm);font-family:var(--font-body);font-size:12px;font-weight:500;cursor:pointer;border:none;transition:var(--anim)}
 .tb-btn-ghost{background:rgba(255,255,255,.08);color:#fff}
 .tb-btn-ghost:hover{background:rgba(255,255,255,.15)}
+.lang-toggle{display:flex;border-radius:var(--r-sm);overflow:hidden;border:1px solid rgba(255,255,255,.15);flex-shrink:0}
+.lang-btn{padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,.45);font-family:var(--font-mono);letter-spacing:.5px;transition:var(--anim)}
+.lang-btn.active{background:var(--accent);color:#fff}
+.lang-btn:hover:not(.active){background:rgba(255,255,255,.1);color:#fff}
 
 /* ─── MAIN (sidebar + content side by side, full height) ───── */
 #main{display:grid;grid-template-columns:var(--sidebar) 1fr;flex:1;overflow:hidden;min-height:0}
@@ -289,10 +293,14 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--dark);min-hei
 <header id="topbar">
   <div class="tb-logo">Adult<span>Sticker</span>Studio</div>
   <div class="tb-badge">v1.0</div>
-  <div class="tb-stat">Niche: <strong id="tbNiche">—</strong></div>
-  <div class="tb-stat">Score: <strong id="tbScore" style="color:var(--accent)">—</strong></div>
+  <div class="tb-stat"><span id="tbNicheLabel">Niche:</span> <strong id="tbNiche">—</strong></div>
+  <div class="tb-stat"><span id="tbScoreLabel">Score:</span> <strong id="tbScore" style="color:var(--accent)">—</strong></div>
   <div class="tb-sep"></div>
-  <button class="tb-btn tb-btn-ghost" onclick="A.openGuide()">📖 Guide</button>
+  <div class="lang-toggle">
+    <button class="lang-btn active" id="langEN" onclick="A.setLang('en')">EN</button>
+    <button class="lang-btn" id="langID" onclick="A.setLang('id')">ID</button>
+  </div>
+  <button class="tb-btn tb-btn-ghost" onclick="A.openGuide()" id="btnGuide">📖 Guide</button>
   <button class="tb-btn tb-btn-ghost" onclick="A.exportJSON()">⬇ Export</button>
 </header>
 
@@ -300,7 +308,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--dark);min-hei
   <!-- SIDEBAR -->
   <aside id="sidebar">
     <div class="sb-top">
-      <div class="sb-label">15 Top Niches</div>
+      <div class="sb-label"><span id="sbLabelText">15 Top Niches</span></div>
       <div class="sb-search">
         <input type="text" id="catSearch" placeholder="Search niche…" oninput="A.filterCats(this.value)">
         <span class="si">🔍</span>
@@ -570,6 +578,67 @@ const CATS = [
   {id:'gamer_adult',e:'🎮',n:'Gamer (Adult)',score:86,cat:'hobby',tagline:'Gaming addiction humor, loot, raid night, respawn life',audience:'Gamers 18-35, mostly male but growing female',platFit:'Etsy · Redbubble · Offline',core:'gamer character controller headset gaming setup funny bold flat vector sticker, dark game aesthetic, white background, thick neon outline, retro pixel energy',keywords:['gamer sticker','gaming humor sticker','gamer gift','respawn sticker','loot sticker'],seoBase:'gamer sticker, gaming humor, gamer gift, respawn sticker, controller sticker, gaming setup sticker',quotes:['One more game (5 hours later)','I don\'t have a problem, I have a respawn point','Adulting? I\'ll do it after this raid','GG (good grief)','My therapist is a save file'],tips:[{icon:'🎮',t:'Avoid game logos',d:'Don\'t use specific game titles or logos (IP issues). Generic gamer culture is safe.'},{icon:'🖤',t:'Dark palette',d:'Black, dark purple, and neon green/blue dominate this niche aesthetic.'},{icon:'🖨',t:'Laptop sticker',d:'Gamers stick stickers on laptops/controllers. Offline die-cut is a strong channel.'}]},
 ];
 
+// ─── INDONESIAN DATA PER NICHE ────────────────────────────────────────────
+const CATS_ID = {
+  work_humor:    {taglineID:'Keluhan kantor, rapat melelahkan, humor deadline', quotesID:['Aku lolos dari rapat yang seharusnya jadi email','Deadline? Lebih tepatnya dead inside','Senin pagi: ujian mental terberat','Kerja dari kasur: mode profesional aktif','Bukan hari ini, inbox!'], keywordsID:['stiker humor kerja','stiker kantoran lucu','stiker rapat','stiker WFH','hadiah rekan kerja'], seoBaseID:'stiker humor kerja, stiker kantoran, hadiah rekan kerja, stiker meeting, kehidupan karyawan'},
+  empowerment:   {taglineID:'Energi bos, kepercayaan diri, afirmasi harga diri', quotesID:['Dia percaya bisa, dan dia bisa','Bukan perempuan biasa','Energi pemeran utama','Lembut tapi mematikan','Diciptakan berbeda'], keywordsID:['stiker pemberdayaan','stiker girl boss','stiker feminis','stiker wanita kuat','stiker self love'], seoBaseID:'stiker girl boss, pemberdayaan wanita, stiker feminis, wanita kuat, cinta diri'},
+  adulting_humor:{taglineID:'Tagihan, tanggung jawab, kekecewaan masa dewasa', quotesID:['Jadi dewasa itu cuma googling cara ngapa-ngapain','Ga ada yang bilang jadi dewasa itu capek banget','Bayar tagihan? Kirain hidup itu gratis','Tolong kirim bantuan (dan camilan)','Puncak hidupku: Jumat sore jam 5'], keywordsID:['stiker adulting','stiker dewasa lucu','stiker milenial','stiker tagihan','hadiah ulang tahun ke-30'], seoBaseID:'stiker adulting, humor dewasa, stiker milenial, grow up sticker, stiker lucu'},
+  ai_humor:      {taglineID:'Jokes ChatGPT, ketergantungan teknologi, humor robot', quotesID:['Ditenagai ChatGPT dan kecemasan','Minta AI benerin hidupku. Dia malah halusinasi.','Bukan hari ini, algoritma','404: kemampuan sosial tidak ditemukan','Data latihan: kebanyakan kekacauan'], keywordsID:['stiker humor AI','stiker ChatGPT','stiker teknologi lucu','stiker robot','stiker programmer'], seoBaseID:'stiker humor AI, stiker ChatGPT, teknologi lucu, stiker robot, humor programmer'},
+  nurse_medical: {taglineID:'Pahlawan kesehatan, bertahan shift malam, humor medis', quotesID:['Saya perawat. Apa kekuatan supernaturalmu?','Infus kafein: edisi perawat','Perawat shift malam: bertenaga kopi dan kekacauan','Tidak semua pahlawan pakai jubah. Ada yang pakai scrubs.','Saya kerja malam. Tidur itu mitos.'], keywordsID:['stiker perawat','stiker humor medis','hadiah perawat','stiker dokter','stiker tenaga kesehatan'], seoBaseID:'stiker perawat, hadiah perawat lucu, humor medis, stiker dokter, tenaga kesehatan'},
+  grind_hustle:  {taglineID:'Wirausaha, side hustle, energi tanpa hari libur', quotesID:['Kerja keras, tidur lebih keras','Tidur setelah dapat investor','Ga ada hari libur (kecuali kalau badan udah ga mau)','Bangun mimpi, satu kopi sekaligus','Wirausaha sendiri: bos saya itu idiot'], keywordsID:['stiker hustle','stiker wirausaha','stiker kerja keras','stiker side hustle','stiker no days off'], seoBaseID:'stiker hustle, wirausaha, kerja keras, side hustle, stiker bos, semangat usaha'},
+  it_coding:     {taglineID:'Kehidupan dev, air mata debugging, warrior keyboard', quotesID:['Di komputer saya jalan kok','Sudah coba matiin terus nyalain lagi?','Ctrl+Z seluruh hidupku tolong','99 bug di kode, fix satu, jadi 127 bug','git blame: selalu saya'], keywordsID:['stiker programmer','stiker coding lucu','hadiah developer','stiker IT','stiker bug'], seoBaseID:'stiker programmer, humor developer, stiker coding, hadiah software engineer, humor IT'},
+  healing_era:   {taglineID:'Terapi, self-care, batasan, pertumbuhan emosional', quotesID:['Aku lagi di era penyembuhan','Terapi itu olahraga mentalku','Tidak adalah kalimat yang lengkap','Jaga kedamaianmu','Sembuh itu butuh waktu, dan itu oke'], keywordsID:['stiker healing','stiker terapi','stiker self care','stiker batasan diri','stiker kesehatan mental'], seoBaseID:'stiker healing era, stiker terapi, self care, batasan diri, kesehatan mental, stiker soft girl'},
+  football:      {taglineID:'Energi hari pertandingan, passion klub, budaya suporter', quotesID:['Performa timku bikin anxious','Sepak bola bukan sekadar hidup atau mati — ini lebih penting','Terlahir buat nonton bola, terpaksa kerja','Offside? Di sini kita ga ngomongin itu','Hari pertandingan > segalanya'], keywordsID:['stiker bola','stiker sepak bola','stiker suporter','stiker hari pertandingan','hadiah pecinta bola'], seoBaseID:'stiker bola, stiker sepak bola, suporter, hari pertandingan, hadiah penggemar bola'},
+  mental_health: {taglineID:'Solidaritas anxiety, humor depresi, kebanggaan neurodivergent', quotesID:['Kecemasanku punya kecemasan sendiri','ADHD: Selalu Doing Hyperfocus Differently','Dewasa yang berfungsi: loading...','Anxiety: life coach original versi saya','Baik-baik aja. (Tidak baik-baik aja.)'], keywordsID:['stiker kesehatan mental','stiker anxiety','stiker depresi lucu','stiker ADHD','stiker neurodivergent'], seoBaseID:'stiker kesehatan mental, stiker anxiety, stiker ADHD, humor terapi, kebanggaan neurodivergent'},
+  astrology:     {taglineID:'Kebanggaan zodiak, vibes kosmik, drama Mercury retrograde', quotesID:['Mercury retrograde yang suruh aku begini','Aku bukan dramatis, aku Scorpio','Kepribadianku? Ada di birth chart-ku','Manifesting sejak dulu kala','Salahkan bulannya'], keywordsID:['stiker astrologi','stiker zodiak','stiker horoskop','stiker Mercury retrograde','stiker bintang'], seoBaseID:'stiker astrologi, hadiah zodiak, Mercury retrograde, stiker bintang, humor horoskop, stiker langit'},
+  serotonin:     {taglineID:'Energi matahari, humor wholesome, kutipan feel-good', quotesID:['Ramalan hari ini: 100% good vibes','Kamu adalah tokoh utama','Kebahagiaan itu gratis, kumpulkan sebanyaknya','Pilih bahagia, terutama hari Senin','Cerah dengan kemungkinan overthinking'], keywordsID:['stiker good vibes','stiker serotonin','stiker bahagia','stiker positif','stiker matahari'], seoBaseID:'stiker good vibes, serotonin, stiker bahagia, energi positif, kutipan matahari, feel good'},
+  sales_umkm:    {taglineID:'Hustle penjual, closing deal, bertahan layanan pelanggan', quotesID:['Satu pesanan lagi, baru tidur','Ongkir lebih mahal dari barangnya','Admin balas pesan: 24 jam nonstop','Closing deal hari ini ✓','Jualan dulu, burnout urusan nanti'], keywordsID:['stiker UMKM','stiker penjual','humor jualan','stiker bisnis kecil','stiker wirausaha lokal'], seoBaseID:'stiker UMKM, penjual online, humor jualan, bisnis kecil, stiker wirausaha, semangat jualan'},
+  parenting:     {taglineID:'Kelelahan orang tua, kekacauan balita, humor ayah/ibu', quotesID:['Kurang tidur tapi tetap berjalan (hampir)','Ibu: ditenagai kopi dan kekacauan','Mode ayah: aktif (dan bingung)','Anakku adalah olahraga dan kecemasanku sekaligus','Jadi orang tua itu 90% improvisasi'], keywordsID:['stiker parenting','stiker ibu lucu','stiker bapak','stiker balita','hadiah orang tua baru'], seoBaseID:'stiker parenting lucu, humor ibu, stiker bapak, kekacauan balita, hadiah orang tua'},
+  gamer_adult:   {taglineID:'Humor kecanduan gaming, loot, raid night, kehidupan respawn', quotesID:['Satu game lagi (5 jam kemudian)','Bukan kecanduan, saya punya titik respawn','Dewasa? Nanti setelah raid ini','GG (good grief)','Terapis saya adalah save file'], keywordsID:['stiker gamer','stiker gaming lucu','hadiah gamer','stiker respawn','stiker controller'], seoBaseID:'stiker gamer, humor gaming, hadiah gamer, stiker respawn, stiker controller, setup gaming'},
+};
+
+// ─── UI TRANSLATIONS ──────────────────────────────────────────────────────
+const UITEXT = {
+  en:{
+    niches:'15 Top Niches', searchPh:'Search niche…', filterAll:'All',
+    stickerType:'Sticker Type', artStyle:'Art Style', engine:'AI Engine',
+    engineHint:'Multi-select = batch', platform:'Platform',
+    quoteTitle:'Quote / Text', quoteOptional:'optional', quotePhCQ:'Type or pick suggestion below…', quotePhTypo:'Required: enter your quote/text here…', quotePhChar:'Optional: concept description (no text on sticker)',
+    genBtn:'Generate Prompt', generating:'Generating…',
+    tabPrompt:'📄 Prompt', tabVars:'🔄 Variations', tabSeo:'🏷 SEO', tabTips:'💡 Tips',
+    copyPrompt:'📋 Copy Prompt', copyAll:'📦 All Engines', regen:'🔄 Regenerate',
+    emptyPrompt:'← Configure options and click ⚡ Generate',
+    emptyVarsTitle:'No Variations Yet', emptyVarsSub:'Generate first to see 5 angle variations.',
+    emptyTipsTitle:'Selling Tips', emptyTipsSub:'Select a niche to see platform-specific tips.',
+    seoTitle:'📋 Listing Title', seoMain:'🏷 Main Tags', seoLt:'🔍 Long-Tail Keywords', seoDesc:'📝 Description Seed', seoCopyAll:'📋 Copy All Tags', seoCopyTitle:'Copy Title',
+    langNote:'',
+    bestPlatforms:'Best Platforms',
+    varAngle:['Dramatic / Emotional','Minimal Cute','Bold Statement','Dry Humor / Sarcastic','Energetic / Hype'],
+    exportBtn:'⬇ Export', guideBtn:'📖 Guide',
+    niche:'Niche', score:'Score',
+    printSpec:'📦 Print / Offline Specs',
+  },
+  id:{
+    niches:'15 Niche Tren Teratas', searchPh:'Cari niche…', filterAll:'Semua',
+    stickerType:'Jenis Stiker', artStyle:'Gaya Seni', engine:'Mesin AI',
+    engineHint:'Multi-pilih = batch', platform:'Platform',
+    quoteTitle:'Quote / Teks', quoteOptional:'opsional', quotePhCQ:'Ketik atau pilih saran di bawah…', quotePhTypo:'Wajib: masukkan quote/teks di sini…', quotePhChar:'Opsional: deskripsi konsep (tanpa teks di stiker)',
+    genBtn:'Buat Prompt', generating:'Membuat…',
+    tabPrompt:'📄 Prompt', tabVars:'🔄 Variasi', tabSeo:'🏷 SEO', tabTips:'💡 Tips',
+    copyPrompt:'📋 Salin Prompt', copyAll:'📦 Semua Mesin', regen:'🔄 Buat Ulang',
+    emptyPrompt:'← Atur pilihan dan klik ⚡ Buat Prompt',
+    emptyVarsTitle:'Belum Ada Variasi', emptyVarsSub:'Buat prompt dulu untuk melihat 5 variasi sudut.',
+    emptyTipsTitle:'Tips Jualan', emptyTipsSub:'Pilih niche untuk lihat tips per platform.',
+    seoTitle:'📋 Judul Listing', seoMain:'🏷 Tag Utama', seoLt:'🔍 Kata Kunci Long-Tail', seoDesc:'📝 Benih Deskripsi', seoCopyAll:'📋 Salin Semua Tag', seoCopyTitle:'Salin Judul',
+    langNote:'💡 Prompt AI tetap bahasa Inggris agar hasil gambar optimal. Teks stiker menggunakan bahasa yang dipilih.',
+    bestPlatforms:'Platform Terbaik',
+    varAngle:['Dramatis / Emosional','Minimalis Lucu','Pernyataan Tegas','Humor Kering / Sarkastik','Energetik / Hype'],
+    exportBtn:'⬇ Ekspor', guideBtn:'📖 Panduan',
+    niche:'Niche', score:'Skor',
+    printSpec:'📦 Spesifikasi Cetak / Offline',
+  }
+};
+
 const STYLES = [
   {id:'bold_flat',   label:'Bold Flat',    dot:'#ff4d00', desc:'thick black outline, flat fill, minimal shading, vector sticker art, clean white background'},
   {id:'vintage',    label:'Vintage',       dot:'#92400e', desc:'retro vintage style, worn texture, muted earthy tones, stamp aesthetic, faded ink look'},
@@ -601,6 +670,9 @@ const A = {
   engines:['mj'], platforms:['etsy'],
   quote:'', filter:'all', query:'',
   activeTab:'prompt', lastPrompt:'', lastVars:[], lastSEO:null,
+  lang:'en',
+
+  T() { return UITEXT[this.lang]; },
 
   init() {
     this.renderStyleRow();
@@ -608,6 +680,72 @@ const A = {
     this.renderPlatRow();
     this.renderCats();
     this.setCat(CATS[0]);
+    this.applyUILang();
+  },
+
+  // ── LANG ──────────────────────────────────────────────────────────────
+  setLang(l) {
+    this.lang = l;
+    document.getElementById('langEN').classList.toggle('active', l==='en');
+    document.getElementById('langID').classList.toggle('active', l==='id');
+    this.applyUILang();
+    this.renderQuoteSuggestions();
+    // Show/hide lang note
+    const note = document.getElementById('langNote');
+    if(note){ note.style.display = l==='id' ? 'block' : 'none'; note.textContent = this.T().langNote; }
+    this.toast(l==='id' ? '🇮🇩 Bahasa Indonesia aktif' : '🇬🇧 English mode');
+  },
+
+  applyUILang() {
+    const t = this.T();
+    const $ = (id,txt) => { const el=document.getElementById(id); if(el) el.textContent=txt; };
+    const $ph = (id,txt) => { const el=document.getElementById(id); if(el) el.placeholder=txt; };
+    $('sbLabel', t.niches);
+    $ph('catSearch', t.searchPh);
+    // filter buttons
+    const ftBtns = document.querySelectorAll('.ft');
+    if(ftBtns[0]) ftBtns[0].textContent = t.filterAll;
+    // section titles
+    const cfgTitles = document.querySelectorAll('.cfg-title');
+    const labels = [t.stickerType, t.artStyle, t.engine, t.platform, t.quoteTitle];
+    cfgTitles.forEach((el,i)=>{ if(labels[i]) el.textContent=labels[i]; });
+    // engine hint
+    const engHint = document.querySelector('.cfg .cfg-hint');
+    if(engHint) engHint.textContent = t.engineHint;
+    // quote optional hint
+    $('qHint', t.quoteOptional);
+    // quote placeholder
+    const qi = document.getElementById('quoteInput');
+    if(qi){
+      const phMap = {char_quote:t.quotePhCQ, typography:t.quotePhTypo, char_only:t.quotePhChar};
+      qi.placeholder = phMap[this.type] || t.quotePhCQ;
+    }
+    // generate button
+    $('genBtnText', t.genBtn);
+    // output tabs
+    const tabs = document.querySelectorAll('.out-tab');
+    const tabLabels = [t.tabPrompt, t.tabVars, t.tabSeo, t.tabTips];
+    tabs.forEach((el,i)=>{ if(tabLabels[i]) el.textContent=tabLabels[i]; });
+    // prompt actions
+    const actBtns = document.querySelectorAll('#promptActions .act-btn');
+    if(actBtns[0]) actBtns[0].textContent = t.copyPrompt;
+    if(actBtns[1]) actBtns[1].textContent = t.copyAll;
+    if(actBtns[2]) actBtns[2].textContent = t.regen;
+    // empty prompt text (only if not generated yet)
+    const po = document.getElementById('promptOut');
+    if(po && document.getElementById('promptActions').style.display==='none'){
+      po.textContent = t.emptyPrompt;
+    }
+    // sidebar label
+    $('sbLabelText', t.niches);
+    // topbar labels
+    $('tbNicheLabel', t.niche+':');
+    $('tbScoreLabel', t.score+':');
+    // guide/export btn
+    $('btnGuide', t.guideBtn);
+    // print spec title
+    const pst = document.querySelector('.offline-spec-title');
+    if(pst) pst.textContent = t.printSpec;
   },
 
   // ── CATEGORY ──────────────────────────────────────────────────────────
@@ -630,19 +768,24 @@ const A = {
   },
 
   renderCats() {
-    const f=this.filter, q=this.query;
+    const f=this.filter, q=this.query, isID=this.lang==='id';
     const list = CATS.filter(c=>{
-      const mQ = !q || c.n.toLowerCase().includes(q) || c.keywords.some(k=>k.includes(q));
+      const idData = CATS_ID[c.id]||{};
+      const mQ = !q || c.n.toLowerCase().includes(q)
+        || c.keywords.some(k=>k.includes(q))
+        || (isID && idData.keywordsID && idData.keywordsID.some(k=>k.toLowerCase().includes(q)));
       const mF = f==='all' || c.cat===f;
       return mQ && mF;
     });
     const el = document.getElementById('catList');
-    if(!list.length){ el.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">No results</div>'; return; }
+    if(!list.length){ el.innerHTML=`<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">${isID?'Tidak ditemukan':'No results'}</div>`; return; }
     el.innerHTML = list.map(c=>{
       const act = this.cat && this.cat.id===c.id;
+      const idData = CATS_ID[c.id]||{};
+      const sub = isID ? (idData.taglineID||c.tagline) : c.tagline;
       return `<div class="cat-item${act?' active':''}" onclick="A.setCat(CATS.find(x=>x.id==='${c.id}'))">
         <div class="cat-emoji">${c.e}</div>
-        <div class="cat-info"><div class="cat-name">${c.n}</div><div class="cat-sub">${c.tagline.substring(0,38)}…</div></div>
+        <div class="cat-info"><div class="cat-name">${c.n}</div><div class="cat-sub">${sub.substring(0,38)}…</div></div>
         <div><div class="score-bar"><div class="score-fill" style="width:${c.score}%"></div></div><div class="score-num">${c.score}%</div></div>
       </div>`;
     }).join('');
@@ -651,10 +794,11 @@ const A = {
   // ── HERO ──────────────────────────────────────────────────────────────
   updateHero() {
     const c = this.cat; if(!c) return;
+    const idData = CATS_ID[c.id]||{};
     document.getElementById('hEmoji').textContent = c.e;
     document.getElementById('hTag').textContent = c.cat.toUpperCase()+' NICHE';
     document.getElementById('hName').textContent = c.n;
-    document.getElementById('hTagline').textContent = c.tagline;
+    document.getElementById('hTagline').textContent = (this.lang==='id' && idData.taglineID) ? idData.taglineID : c.tagline;
     document.getElementById('hAud').textContent = c.audience.split(' ')[0]+' '+c.audience.split(' ')[1];
     document.getElementById('hPlat').textContent = c.platFit;
     document.getElementById('hScore').textContent = c.score+'%';
@@ -724,16 +868,20 @@ const A = {
   // ── QUOTE ─────────────────────────────────────────────────────────────
   renderQuoteSuggestions() {
     const c = this.cat; if(!c) return;
-    // Store quotes as data attributes to avoid HTML escaping issues
-    document.getElementById('qSugList').innerHTML = c.quotes.map((q,i)=>
-      `<div class="q-sug" data-qi="${i}" onclick="A.applyQuoteIdx(${i})">${this.esc(q)}</div>`
+    const idData = CATS_ID[c.id]||{};
+    const quotes = (this.lang==='id' && idData.quotesID) ? idData.quotesID : c.quotes;
+    document.getElementById('qSugList').innerHTML = quotes.map((q,i)=>
+      `<div class="q-sug" onclick="A.applyQuoteIdx(${i})">${this.esc(q)}</div>`
     ).join('');
   },
   applyQuoteIdx(i) {
-    const q = this.cat.quotes[i];
+    const c = this.cat; if(!c) return;
+    const idData = CATS_ID[c.id]||{};
+    const quotes = (this.lang==='id' && idData.quotesID) ? idData.quotesID : c.quotes;
+    const q = quotes[i];
     document.getElementById('quoteInput').value = q;
     this.quote = q;
-    this.toast('Quote applied ✓');
+    this.toast(this.lang==='id' ? 'Quote diterapkan ✓' : 'Quote applied ✓');
   },
   onQuoteInput(el) {
     this.quote = el.value;
@@ -755,7 +903,7 @@ const A = {
     const btn = document.getElementById('genBtn');
     btn.disabled = true;
     document.getElementById('genBtnIcon').innerHTML = '<span class="spinner"></span>';
-    document.getElementById('genBtnText').textContent = 'Generating…';
+    document.getElementById('genBtnText').textContent = this.T().generating;
 
     setTimeout(()=>{
       try {
@@ -777,14 +925,14 @@ const A = {
         if(this.platforms.includes('offline')) spec.classList.add('show');
         else spec.classList.remove('show');
 
-        this.toast('Prompt generated! ✓');
+        this.toast(this.lang==='id' ? 'Prompt berhasil dibuat! ✓' : 'Prompt generated! ✓');
       } catch(err) {
         this.toast('Error: '+err.message);
         console.error(err);
       }
       btn.disabled = false;
       document.getElementById('genBtnIcon').textContent = '⚡';
-      document.getElementById('genBtnText').textContent = 'Generate Prompt';
+      document.getElementById('genBtnText').textContent = this.T().genBtn;
     }, 280);
   },
 
@@ -818,30 +966,48 @@ const A = {
   },
 
   buildVars() {
-    const angles = [
-      {label:'Dramatic / Emotional', mod:'exaggerated dramatic expression, big teary eyes, cinematic emotion'},
-      {label:'Minimal Cute',         mod:'super cute minimalist chibi, simplified features, adorable kawaii style'},
-      {label:'Bold Statement',       mod:'bold graphic impact, high contrast, poster-like composition, punchy'},
-      {label:'Dry Humor / Sarcastic',mod:'deadpan expression, subtle irony in pose, understated dry humor'},
-      {label:'Energetic / Hype',     mod:'dynamic action lines, explosive energy burst, excited hyped-up character'},
+    const t = this.T();
+    const mods = [
+      'exaggerated dramatic expression, big teary eyes, cinematic emotion',
+      'super cute minimalist chibi, simplified features, adorable kawaii style',
+      'bold graphic impact, high contrast, poster-like composition, punchy',
+      'deadpan expression, subtle irony in pose, understated dry humor',
+      'dynamic action lines, explosive energy burst, excited hyped-up character',
     ];
-    return angles.map((a,i)=>({num:i+1, angle:a.label, prompt:this.buildPrompt(a.mod)}));
+    return mods.map((mod,i)=>({num:i+1, angle:t.varAngle[i], prompt:this.buildPrompt(mod)}));
   },
 
   buildSEO() {
     const c = this.cat;
-    const platTags = this.platforms.map(pid=>({etsy:'etsy sticker',redbubble:'redbubble sticker',shopee:'shopee sticker',offline:'print sticker die cut',line:'line sticker',whatsapp:'whatsapp sticker'})[pid]||'').filter(Boolean);
-    const typeTags = ({char_quote:['character sticker','quote sticker','funny sticker'],typography:['typography sticker','text sticker','lettering sticker'],char_only:['character art sticker','illustration sticker']})[this.type]||[];
+    const idData = CATS_ID[c.id]||{};
+    const isID = this.lang==='id';
+    const keywords  = (isID && idData.keywordsID)  ? idData.keywordsID  : c.keywords;
+    const seoBase   = (isID && idData.seoBaseID)   ? idData.seoBaseID   : c.seoBase;
+    const tagline   = (isID && idData.taglineID)   ? idData.taglineID   : c.tagline;
+    const platTagsID= {etsy:'stiker etsy',redbubble:'stiker redbubble',shopee:'stiker shopee',offline:'stiker cetak',line:'stiker line',whatsapp:'stiker whatsapp'};
+    const platTagsEN= {etsy:'etsy sticker',redbubble:'redbubble sticker',shopee:'shopee sticker',offline:'print sticker die cut',line:'line sticker',whatsapp:'whatsapp sticker'};
+    const platMap   = isID ? platTagsID : platTagsEN;
+    const platTags  = this.platforms.map(pid=>platMap[pid]||'').filter(Boolean);
+    const typeTagsEN= {char_quote:['character sticker','quote sticker','funny sticker'],typography:['typography sticker','text sticker','lettering sticker'],char_only:['character art sticker','illustration sticker']};
+    const typeTagsID= {char_quote:['stiker karakter','stiker quote','stiker lucu'],typography:['stiker tipografi','stiker teks','stiker lettering'],char_only:['stiker karakter seni','stiker ilustrasi']};
+    const typeTags  = ((isID ? typeTagsID : typeTagsEN)[this.type])||[];
     return {
-      mainTags: [...c.keywords, ...typeTags, ...platTags].slice(0,13),
-      longTail: [
+      mainTags: [...keywords, ...typeTags, ...platTags].slice(0,13),
+      longTail: isID ? [
+        c.n.toLowerCase()+' stiker untuk tumbler',
+        c.n.toLowerCase()+' stiker lucu hadiah',
+        c.n.toLowerCase()+' stiker laptop',
+        'paket stiker '+c.n.toLowerCase()+' imut',
+      ] : [
         c.n.toLowerCase()+' sticker for water bottle',
         'funny '+c.n.toLowerCase()+' gift sticker',
         c.n.toLowerCase()+' laptop sticker',
         'cute '+c.n.toLowerCase()+' sticker pack',
       ],
-      title: c.n+' Sticker | '+(c.keywords[0]||'Funny Sticker')+' | Digital Download',
-      desc:  c.tagline+'. Perfect for '+c.platFit+'. '+c.seoBase+'.',
+      title: isID
+        ? c.n+' Stiker | '+(keywords[0]||'Stiker Lucu')+' | Unduhan Digital'
+        : c.n+' Sticker | '+(c.keywords[0]||'Funny Sticker')+' | Digital Download',
+      desc: tagline+'. '+(isID?'Cocok untuk ':'Perfect for ')+c.platFit+'. '+seoBase+'.',
     };
   },
 
@@ -874,29 +1040,31 @@ const A = {
 
   renderSEOPanel() {
     const s = this.lastSEO; if(!s) return;
+    const t = this.T();
     const p = document.getElementById('seoPanel');
-    const mainTagsHtml = s.mainTags.map(t=>`<div class="seo-tag" onclick="A.writeClip('${this.escJs(t)}','Tag copied!')">${this.esc(t)}</div>`).join('');
-    const ltTagsHtml   = s.longTail.map(t=>`<div class="seo-tag" onclick="A.writeClip('${this.escJs(t)}','Keyword copied!')">${this.esc(t)}</div>`).join('');
+    const copied  = this.lang==='id' ? 'Disalin!' : 'Copied!';
+    const mainTagsHtml = s.mainTags.map(tag=>`<div class="seo-tag" onclick="A.writeClip('${this.escJs(tag)}','${copied}')">${this.esc(tag)}</div>`).join('');
+    const ltTagsHtml   = s.longTail.map(tag=>`<div class="seo-tag" onclick="A.writeClip('${this.escJs(tag)}','${copied}')">${this.esc(tag)}</div>`).join('');
     p.innerHTML = `
       <div class="seo-group">
-        <div class="seo-group-title">📋 Listing Title</div>
+        <div class="seo-group-title">${t.seoTitle}</div>
         <div class="seo-meta">${this.esc(s.title)}</div>
-        <button class="act-btn" style="margin-bottom:10px" onclick="A.writeClip('${this.escJs(s.title)}','Title copied!')">Copy Title</button>
+        <button class="act-btn" style="margin-bottom:10px" onclick="A.writeClip('${this.escJs(s.title)}','${copied}')">${t.seoCopyTitle}</button>
       </div>
       <div class="seo-group">
-        <div class="seo-group-title">🏷 Main Tags (${s.mainTags.length}/13) — click to copy</div>
+        <div class="seo-group-title">${t.seoMain} (${s.mainTags.length}/13) — klik untuk salin</div>
         <div class="seo-tags">${mainTagsHtml}</div>
       </div>
       <div class="seo-group" style="margin-top:10px">
-        <div class="seo-group-title">🔍 Long-Tail Keywords</div>
+        <div class="seo-group-title">${t.seoLt}</div>
         <div class="seo-tags">${ltTagsHtml}</div>
       </div>
       <div class="seo-group" style="margin-top:10px">
-        <div class="seo-group-title">📝 Description Seed</div>
+        <div class="seo-group-title">${t.seoDesc}</div>
         <div class="seo-meta">${this.esc(s.desc)}</div>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
-        <button class="act-btn pri" onclick="A.copyAllSEO()">📋 Copy All Tags</button>
+        <button class="act-btn pri" onclick="A.copyAllSEO()">${t.seoCopyAll}</button>
       </div>`;
   },
 
@@ -908,26 +1076,33 @@ const A = {
 
   renderTips() {
     const c = this.cat; if(!c||!c.tips) return;
+    const t = this.T();
+    const langNote = this.lang==='id'
+      ? `<div id="langNote" style="margin-bottom:10px;padding:8px 10px;background:#fffbeb;border:1px solid #fde68a;border-radius:var(--r-sm);font-size:11px;color:#92400e">${t.langNote}</div>`
+      : `<div id="langNote" style="display:none"></div>`;
     document.getElementById('tipsPanel').innerHTML = `
-      ${c.tips.map(t=>`<div class="tip-item"><div class="tip-icon">${t.icon}</div><div><div class="tip-title">${t.t}</div><div class="tip-desc">${t.d}</div></div></div>`).join('')}
+      ${langNote}
+      ${c.tips.map(tip=>`<div class="tip-item"><div class="tip-icon">${tip.icon}</div><div><div class="tip-title">${tip.t}</div><div class="tip-desc">${tip.d}</div></div></div>`).join('')}
       <div style="margin-top:12px;padding:10px;background:var(--bg);border-radius:var(--r-sm);border:1px solid var(--border)">
-        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Best Platforms</div>
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">${t.bestPlatforms}</div>
         <div style="font-size:13px">${c.platFit}</div>
       </div>`;
   },
 
   // ── COPY ─────────────────────────────────────────────────────────────
   copyPrompt() {
-    if(this.lastPrompt) this.writeClip(this.lastPrompt, 'Prompt copied! ✓');
+    const msg = this.lang==='id' ? 'Prompt disalin! ✓' : 'Prompt copied! ✓';
+    if(this.lastPrompt) this.writeClip(this.lastPrompt, msg);
   },
 
   copyAll() {
-    if(!this.lastPrompt||!this.cat){this.toast('Generate first!'); return;}
+    if(!this.lastPrompt||!this.cat){ this.toast(this.lang==='id'?'Buat prompt dulu!':'Generate first!'); return; }
     const out = this.engines.map(eid=>{
       const eng = ENGINES.find(e=>e.id===eid);
       return '=== '+eng.label.toUpperCase()+' ===\n'+this.buildPrompt(null,eid);
     }).join('\n\n');
-    this.writeClip(out, 'All engine prompts copied! ✓');
+    const msg = this.lang==='id' ? 'Semua prompt disalin! ✓' : 'All engine prompts copied! ✓';
+    this.writeClip(out, msg);
   },
 
   exportJSON() {
